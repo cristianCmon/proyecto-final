@@ -87,3 +87,6 @@ if (isDevelopment) {
     })
   }
 }
+
+// PARA CORRER APLICACIÓN
+// npm run electron:serve
