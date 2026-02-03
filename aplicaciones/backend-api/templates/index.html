@@ -9,8 +9,25 @@
 <body>
     <div class="card">
         <h1>¡Hola, {{ usuario }}!</h1>
-        <p>Este es un diseño 100% personalizado sin usar frameworks externos.</p>
-        <a href="#" class="btn">Empezar ahora</a>
+        <p>Vamos al lío</p>    
     </div>
+
+    <nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('obtener_usuarios') }}" target="_blank">MOSTRAR USUARIOS</a>
+            </li>
+            <li>
+                <a href="{{ url_for('obtener_actividades') }}" target="_blank">MOSTRAR ACTIVIDADES</a>
+            </li>
+            <li>
+                <a href="{{ url_for('obtener_usuarios') }}" target="_blank">MOSTRAR RESERVAS</a>
+            </li>
+            <li>
+                <a href="{{ url_for('obtener_usuarios') }}" target="_blank">MOSTRAR ASISTENCIAS</a>
+            </li>
+        </ul>
+    </nav>
+
 </body>
 </html>
