@@ -81,7 +81,7 @@ def obtener_usuarios():
     ), 200
 
 @app.route('/usuarios/<id>', methods=['GET'])
-def obtener_usuario_id(id):
+def obtener_usuario(id):
     coleccion = db['usuarios']
 
     try:
@@ -116,14 +116,32 @@ def obtener_usuario_id(id):
 
 @app.route('/actividades', methods=['GET'])
 def obtener_actividades():
+    coleccion = db['actividades']
+    pass
+
+@app.route('/actividades/<id>', methods=['GET'])
+def obtener_actividad(id):
+    coleccion = db['actividades']
     pass
 
 @app.route('/reservas', methods=['GET'])
 def obtener_reservas():
+    coleccion = db['reservas']
+    pass
+
+@app.route('/reservas/<id>', methods=['GET'])
+def obtener_reserva(id):
+    coleccion = db['reservas']
     pass
 
 @app.route('/asistencias', methods=['GET'])
 def obtener_asistencias():
+    coleccion = db['asistencias']
+    pass
+
+@app.route('/asistencias/<id>', methods=['GET'])
+def obtener_asistencia(id):
+    coleccion = db['asistencias']
     pass
 
 
