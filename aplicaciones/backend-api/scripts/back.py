@@ -180,6 +180,22 @@ def actualizar_usuario(id):
     except Exception as e:
         return jsonify({"ERROR": "ID no válido o error interno", "detalle": str(e)}), 400
 
+@app.route('/actividades/<id>', methods=['PUT'])
+def actualizar_actividad(id):
+    coleccion = db['actividades']
+    pass
+
+@app.route('/reservas/<id>', methods=['PUT'])
+def actualizar_reserva(id):
+    coleccion = db['reservas']
+    pass
+
+@app.route('/asistencias/<id>', methods=['PUT'])
+def actualizar_asistencia(id):
+    coleccion = db['asistencias']
+    pass
+
+
 ## MÉTODOS DELETE
 @app.route('/usuarios/<id>', methods=['DELETE'])
 def eliminar_usuario(id):
@@ -197,6 +213,21 @@ def eliminar_usuario(id):
 
     except Exception as e:
         return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
+
+@app.route('/actividades/<id>', methods=['DELETE'])
+def eliminar_actividad(id):
+    coleccion = db['actividades']
+    pass
+
+@app.route('/reservas/<id>', methods=['DELETE'])
+def eliminar_reserva(id):
+    coleccion = db['reservas']
+    pass
+
+@app.route('/asistencias/<id>', methods=['DELETE'])
+def eliminar_asistencia(id):
+    coleccion = db['asistencias']
+    pass
 
 
 
