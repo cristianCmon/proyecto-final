@@ -25,7 +25,10 @@ db = cliente['gestora']
 def vista_principal():
     return render_template('index.html', usuario="Programador")
 
-## MÉTODOS POST
+
+#### MÉTODOS POST ####
+
+## USUARIO
 @app.route('/usuarios', methods=['POST'])
 def crear_usuario():
     coleccion = db['usuarios']
@@ -54,8 +57,28 @@ def crear_usuario():
 
     return jsonify({"mensaje": "Usuario creado", "id": str(id_insertado)}), 201
 
+## ACTIVIDAD
+@app.route('/actividades', methods=['POST'])
+def crear_actividad():
+    coleccion = db['actividades']
+    pass
 
-## MÉTODOS GET
+## RESERVA
+@app.route('/reservas', methods=['POST'])
+def crear_reserva():
+    coleccion = db['reservas']
+    pass
+
+## ASISTENCIA
+@app.route('/asistencias', methods=['POST'])
+def crear_asistencia():
+    coleccion = db['asistencias']
+    pass
+
+
+#### MÉTODOS GET ####
+
+## USUARIOS
 @app.route('/usuarios', methods=['GET'])
 def obtener_usuarios():
     coleccion = db['usuarios']
@@ -80,6 +103,7 @@ def obtener_usuarios():
         mimetype='application/json'
     ), 200
 
+## USUARIO/ID
 @app.route('/usuarios/<id>', methods=['GET'])
 def obtener_usuario(id):
     coleccion = db['usuarios']
@@ -114,38 +138,46 @@ def obtener_usuario(id):
         # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
         return jsonify({"ERROR": "ID no válido"}), 400
 
+## ACTIVIDADES
 @app.route('/actividades', methods=['GET'])
 def obtener_actividades():
     coleccion = db['actividades']
     pass
 
+## ACTIVIDAD/ID
 @app.route('/actividades/<id>', methods=['GET'])
 def obtener_actividad(id):
     coleccion = db['actividades']
     pass
 
+## RESERVAS
 @app.route('/reservas', methods=['GET'])
 def obtener_reservas():
     coleccion = db['reservas']
     pass
 
+## RESERVA/ID
 @app.route('/reservas/<id>', methods=['GET'])
 def obtener_reserva(id):
     coleccion = db['reservas']
     pass
 
+## ASISTENCIAS
 @app.route('/asistencias', methods=['GET'])
 def obtener_asistencias():
     coleccion = db['asistencias']
     pass
 
+## ASISTENCIA/ID
 @app.route('/asistencias/<id>', methods=['GET'])
 def obtener_asistencia(id):
     coleccion = db['asistencias']
     pass
 
 
-## MÉTODOS PUT
+#### MÉTODOS PUT ####
+
+## USUARIO/ID
 @app.route('/usuarios/<id>', methods=['PUT'])
 def actualizar_usuario(id):
     coleccion = db['usuarios']
@@ -180,23 +212,28 @@ def actualizar_usuario(id):
     except Exception as e:
         return jsonify({"ERROR": "ID no válido o error interno", "detalle": str(e)}), 400
 
+## ACTIVIDAD/ID
 @app.route('/actividades/<id>', methods=['PUT'])
 def actualizar_actividad(id):
     coleccion = db['actividades']
     pass
 
+## RESERVA/ID
 @app.route('/reservas/<id>', methods=['PUT'])
 def actualizar_reserva(id):
     coleccion = db['reservas']
     pass
 
+## ASISTENCIA/ID
 @app.route('/asistencias/<id>', methods=['PUT'])
 def actualizar_asistencia(id):
     coleccion = db['asistencias']
     pass
 
 
-## MÉTODOS DELETE
+#### MÉTODOS DELETE ####
+
+## USUARIO/ID
 @app.route('/usuarios/<id>', methods=['DELETE'])
 def eliminar_usuario(id):
     coleccion = db['usuarios']
@@ -214,16 +251,19 @@ def eliminar_usuario(id):
     except Exception as e:
         return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
 
+## ACTIVIDAD/ID
 @app.route('/actividades/<id>', methods=['DELETE'])
 def eliminar_actividad(id):
     coleccion = db['actividades']
     pass
 
+## RESERVA/ID
 @app.route('/reservas/<id>', methods=['DELETE'])
 def eliminar_reserva(id):
     coleccion = db['reservas']
     pass
 
+## ASISTENCIA/ID
 @app.route('/asistencias/<id>', methods=['DELETE'])
 def eliminar_asistencia(id):
     coleccion = db['asistencias']
@@ -235,7 +275,6 @@ if __name__ == '__main__':
     print('\nIniciando Backend...\n')
     app.run(debug = True, use_reloader = False)
     # app.run(debug = True)
-
 
 # GUÍAS
 # https://j2logo.com/leccion-1-la-primera-aplicacion-flask/
