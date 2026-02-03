@@ -276,6 +276,8 @@ if __name__ == '__main__':
     app.run(debug = True, use_reloader = False)
     # app.run(debug = True)
 
+# python -m back
+
 # GUÍAS
 # https://j2logo.com/leccion-1-la-primera-aplicacion-flask/
 # https://www.youtube.com/watch?v=QBx7sLNM0_A
