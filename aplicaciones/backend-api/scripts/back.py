@@ -37,7 +37,7 @@ def crear_usuario():
     datos = request.json
 
     # COMIENZO VALIDACIONES
-    # Extraemos los campos que deben ser únicos
+    # Extraemos contraseña y los campos que deben ser únicos
     nombre_usuario = datos.get('nombre_usuario')
     email = datos.get('email')
     dni = datos.get('dni')
@@ -85,6 +85,7 @@ def crear_usuario():
         "estado_suscripcion": True
     }
 
+    # Insertarmos nuevo registro en la base de datos
     id_insertado = coleccion.insert_one(nuevoUsuario).inserted_id
 
     return jsonify({
@@ -97,7 +98,39 @@ def crear_usuario():
 @app.route('/actividades', methods=['POST'])
 def crear_actividad():
     coleccion = db['actividades']
-    pass
+    datos = request.json
+
+    # COMIENZO VALIDACIONES
+    # Extraemos los campos que deben ser únicos
+    nombre = datos.get('nombre')
+    horario = datos.get('horario')
+    capacidad_maxima = datos.get('capacidad_maxima')
+
+    # Validación de existencia en formulario de campos obligatorios
+    if not nombre or not horario or not capacidad_maxima:
+        return jsonify({"ERROR": "Debe rellenar los campos obligatorios (nombre de actividad, horario, capacidad máxima)"}), 400
+    
+    # Estructuramos el nuevo documento
+    nuevaActividad = {
+        "nombre": nombre,
+        "descripcion": datos.get('descripcion', ""),
+        "capacidad_max": int(datos.get('capacidad_max')),
+        "capacidad_actual": 0,
+        "horario": {
+            "dia": datos.get('horario').get('dia'),
+            "hora_inicio": datos.get('horario').get('hora_inicio'),
+            "hora_fin": datos.get('horario').get('hora_fin')
+        },
+        "fecha_creacion": fecha.datetime.now()
+    }
+
+    # Insertarmos nuevo registro en la base de datos
+    id_insertado = coleccion.insert_one(nuevaActividad).inserted_id
+
+    return jsonify({
+        "mensaje": "Actividad creada",
+        "id": str(id_insertado)
+    }), 201
 
 ## RESERVA
 @app.route('/reservas', methods=['POST'])
