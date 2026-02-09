@@ -1,0 +1,40 @@
+### LEER USUARIOS
+GET http://localhost:5000/usuarios
+
+###
+GET http://localhost:5000/usuarios/6914997ad4d38d3263ac3540
+
+### LEER ACTIVIDADES
+GET http://localhost:5000/actividades
+
+###
+GET http://localhost:5000/actividades/69149988d4d38d3263ac3547
+
+### LEER RESERVAS
+GET http://localhost:5000/reservas
+
+###
+GET http://localhost:5000/reservas/
+
+### LEER ASISTENCIAS
+GET http://localhost:5000/asistencias
+
+###
+GET http://localhost:5000/asistencias/
+
+
+
+### CREAR USUARIO
+POST http://localhost:5000/usuarios
+Content-Type: application/json
+
+{
+    "nombre_usuario": "monica90",
+    "contraseña": "abc123..",
+    "nombre": "Mónica",
+    "apellidos": "Ortiz Domínguez",
+    "dni": "36152233A",
+    "telefono": "667132456",
+    "email": "mon90@hotmail.com",
+    "rol": "cliente"
+}

@@ -1,9 +1,11 @@
 import os
 import json
+import datetime as fecha
 from flask import Flask, request, jsonify, render_template, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+
 
 # Obtenemos la ruta absoluta de la carpeta donde está este archivo
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,28 +36,62 @@ def crear_usuario():
     coleccion = db['usuarios']
     datos = request.json
 
-    # Extraemos la contraseña plana
+    # COMIENZO VALIDACIONES
+    # Extraemos los campos que deben ser únicos
+    nombre_usuario = datos.get('nombre_usuario')
+    email = datos.get('email')
+    dni = datos.get('dni')
     passPlana = datos.get('contraseña')
 
+    # Validación de existencia en formulario de campos obligatorios
+    if not nombre_usuario or not passPlana or not email or not dni:
+        return jsonify({"ERROR": "Debe rellenar los campos obligatorios (nombre de usuario, contraseña, email, dni)"}), 400
+
+    # Comprobación de existencia en base de datos de los campos únicos anteriores
+    usuario_existente = coleccion.find_one({
+        "$or": [ # El operador $or devuelve un documento si coincide cualquiera de las condiciones 
+            {"nombre_usuario": nombre_usuario},
+            {"email": email},
+            {"dni": dni}
+        ]
+    })
+
+    # Si ya existe un usuario personalizamos el mensaje según qué campo falló
+    if usuario_existente:
+        if usuario_existente.get('email') == email:
+            mensaje = "Ese email ya está registrado"
+        elif usuario_existente.get('dni') == dni:
+            mensaje = "Ese DNI ya está registrado"
+        else:
+            mensaje = "El nombre de usuario ya está en uso"
+        
+        return jsonify({"ERROR": mensaje}), 400
+
+    # Si pasamos validaciones procedemos normalmente
     # Generamos el hash
     passHasheada = generate_password_hash(passPlana)
 
+    # Creamos nuevo usuario
     nuevoUsuario = {
-        "nombre_usuario": datos.get('nombre_usuario'),
+        "nombre_usuario": nombre_usuario,
         "contraseña": passHasheada,  # <--- Guardamos el hash
         "nombre": datos.get('nombre'),
         "apellidos": datos.get('apellidos'),
-        "edad": datos.get("edad"),
-        "dni": datos.get('dni'),
+        "dni": dni,
         "telefono": datos.get('telefono'),
-        "email": datos.get('email'),
-        "rol": datos.get('rol')
+        "email": email,
+        "rol": datos.get('rol'),
+        "fecha_alta": fecha.datetime.now(),
+        "estado_suscripcion": True
     }
 
-    # id_insertado = coleccion.insert_one(datos).inserted_id
     id_insertado = coleccion.insert_one(nuevoUsuario).inserted_id
 
-    return jsonify({"mensaje": "Usuario creado", "id": str(id_insertado)}), 201
+    return jsonify({
+        "mensaje": "Usuario creado",
+        "id": str(id_insertado),
+        "fecha_alta": nuevoUsuario["fecha_alta"].isoformat()
+    }), 201
 
 ## ACTIVIDAD
 @app.route('/actividades', methods=['POST'])
@@ -142,13 +178,47 @@ def obtener_usuario(id):
 @app.route('/actividades', methods=['GET'])
 def obtener_actividades():
     coleccion = db['actividades']
-    pass
+    actividades = []
+
+    for doc in coleccion.find():
+        actividades.append({
+            "id": str(doc['_id']),
+            "nombre": doc.get('nombre'),
+            "descripcion": doc.get('descripcion')
+        })
+
+    # return jsonify(actividades), 200 # Devuelve json con campos ordenados alfabéticamente
+    return Response(
+        json.dumps(actividades, sort_keys=False),
+        mimetype='application/json'
+    ), 200
 
 ## ACTIVIDAD/ID
 @app.route('/actividades/<id>', methods=['GET'])
 def obtener_actividad(id):
     coleccion = db['actividades']
-    pass
+    try:
+        actividad = coleccion.find_one({"_id": ObjectId(id)})
+
+        if actividad:
+            respuesta = {
+                "id": str(actividad['_id']),
+                "nombre": actividad.get('nombre'),
+                "descripcion": actividad.get('descripcion')
+            }
+
+            # return jsonify(respuesta), 200
+            return Response(
+                json.dumps(respuesta, sort_keys=False),
+                mimetype='application/json'
+            ), 200
+        
+        else:
+            return jsonify({"ERROR": "Actividad no encontrada"}), 404
+    
+    except Exception as e:
+        # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
+        return jsonify({"ERROR": "ID no válido"}), 400
 
 ## RESERVAS
 @app.route('/reservas', methods=['GET'])
@@ -272,8 +342,8 @@ def eliminar_asistencia(id):
 
 if __name__ == '__main__':
     print('\nIniciando Backend...\n')
-    app.run(debug = True, use_reloader = False)
-    # app.run(debug = True)
+    # app.run(debug = True, use_reloader = False)
+    app.run(debug = True)
 
 # python -m back
 
