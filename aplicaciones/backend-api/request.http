@@ -29,12 +29,12 @@ POST http://localhost:5000/usuarios
 Content-Type: application/json
 
 {
-    "nombre_usuario": "monica90",
+    "nombre_usuario": "pedro78",
     "contraseña": "abc123..",
-    "nombre": "Mónica",
-    "apellidos": "Ortiz Domínguez",
-    "dni": "36152233A",
-    "telefono": "667132456",
-    "email": "mon90@hotmail.com",
+    "nombre": "Pedro",
+    "apellidos": "Escudero García",
+    "dni": "36152233B",
+    "telefono": "667132457",
+    "email": "pedro78@hotmail.com",
     "rol": "cliente"
 }

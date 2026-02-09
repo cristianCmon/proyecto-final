@@ -74,7 +74,7 @@ def crear_usuario():
     # Creamos nuevo usuario
     nuevoUsuario = {
         "nombre_usuario": nombre_usuario,
-        "contraseña": passHasheada,  # <--- Guardamos el hash
+        "contraseña": passHasheada,
         "nombre": datos.get('nombre'),
         "apellidos": datos.get('apellidos'),
         "dni": dni,
