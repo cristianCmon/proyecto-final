@@ -18,10 +18,12 @@ cliente = MongoClient('mongodb+srv://cristianxp_db_user:wpZqcQKcnUl4kGk4@cluster
 db = cliente['gestora']
 
 
+
 # RUTAS
 @app.route('/')
 def vista_principal():
     return render_template('index.html', usuario="Programador")
+
 
 
 #### MÉTODOS POST ####
@@ -266,7 +268,6 @@ def eliminar_reserva(id):
 def eliminar_asistencia(id):
     coleccion = db['asistencias']
     pass
-
 
 
 if __name__ == '__main__':
