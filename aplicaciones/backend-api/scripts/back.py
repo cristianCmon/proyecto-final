@@ -179,7 +179,7 @@ def crear_sesion(id):
                     "hora_fin": h['hora_fin'],
                     "capacidad_maxima": actividad['capacidad_maxima'],
                     "capacidad_actual": 0,
-                    "estado": "programada"
+                    "estado": "programada" # cancelada, finalizada
                 }
                 
                 # Evitar duplicados (mismo día y hora para esa actividad)
