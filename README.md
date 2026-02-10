@@ -10,7 +10,7 @@ python -m venv venv
 deactivate (para salir una vez dentro)
 
 ### Para instalar dependencias (dentro de entorno virtual)
-pip install flask
+pip install flask pymongo
 
 ### Para ejecutar el script de la API
 python scripts/back.py
