@@ -38,3 +38,25 @@ Content-Type: application/json
     "email": "pedro78@hotmail.com",
     "rol": "cliente"
 }
+
+### CREAR ACTIVIDAD
+POST http://localhost:5000/actividades
+Content-Type: application/json
+
+{
+    "nombre": "Boxeo",
+    "descripcion": "Instrucción básica en el noble arte pugilístico",
+    "capacidad_maxima": 20,
+    "horario": [
+        {
+            "dia": "Lunes",
+            "hora_inicio": "10:00",
+            "hora_fin": "11:30"
+        },
+        {
+            "dia": "Miércoles",
+            "hora_inicio": "10:00",
+            "hora_fin": "11:30"
+        }
+    ]
+}

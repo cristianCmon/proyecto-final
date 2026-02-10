@@ -1,7 +1,7 @@
 import os
 import json
 import datetime as fecha
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, send_from_directory, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -21,11 +21,15 @@ cliente = MongoClient('mongodb+srv://cristianxp_db_user:wpZqcQKcnUl4kGk4@cluster
 db = cliente['gestora']
 
 
-
 # RUTAS
 @app.route('/')
 def vista_principal():
     return render_template('index.html', usuario="Programador")
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, '..', 'static'),
+        'favicon-32x32.png', mimetype='image/vnd.microsoft.icon')
 
 
 
@@ -104,34 +108,48 @@ def crear_actividad():
     # COMIENZO VALIDACIONES
     # Extraemos los campos que deben ser únicos
     nombre = datos.get('nombre')
-    horario = datos.get('horario')
+    horariosRecibidos = datos.get('horario')
     capacidad_maxima = datos.get('capacidad_maxima')
 
     # Validación de existencia en formulario de campos obligatorios
-    if not nombre or not horario or not capacidad_maxima:
+    if not nombre or not horariosRecibidos or not capacidad_maxima:
         return jsonify({"ERROR": "Debe rellenar los campos obligatorios (nombre de actividad, horario, capacidad máxima)"}), 400
+    
+    # Comprobamos que 'horario' sea una lista
+    if not isinstance(horariosRecibidos, list):
+        return jsonify({"ERROR": "El campo 'horario' debe ser una lista de horarios"}), 400
+    
+    # Procesamos la lista de horarios
+    listaHorariosProcesada = []
+
+    for horario in horariosRecibidos:
+        listaHorariosProcesada.append({
+            "dia": horario.get('dia'),
+            "hora_inicio": horario.get('hora_inicio'),
+            "hora_fin": horario.get('hora_fin')
+        })
     
     # Estructuramos el nuevo documento
     nuevaActividad = {
         "nombre": nombre,
         "descripcion": datos.get('descripcion', ""),
-        "capacidad_max": int(datos.get('capacidad_max')),
+        "capacidad_maxima": capacidad_maxima,
         "capacidad_actual": 0,
-        "horario": {
-            "dia": datos.get('horario').get('dia'),
-            "hora_inicio": datos.get('horario').get('hora_inicio'),
-            "hora_fin": datos.get('horario').get('hora_fin')
-        },
+        "horario": listaHorariosProcesada,
         "fecha_creacion": fecha.datetime.now()
     }
 
-    # Insertarmos nuevo registro en la base de datos
-    id_insertado = coleccion.insert_one(nuevaActividad).inserted_id
+    try:
+        # Insertarmos nuevo registro en la base de datos
+        id_insertado = coleccion.insert_one(nuevaActividad).inserted_id
 
-    return jsonify({
-        "mensaje": "Actividad creada",
-        "id": str(id_insertado)
-    }), 201
+        return jsonify({
+            "mensaje": "Actividad creada",
+            "id": str(id_insertado)
+        }), 201
+    
+    except Exception as ex:
+        return jsonify({"ERROR": "No se pudo crear la actividad", "Detalle": str(ex)}), 500    
 
 ## RESERVA
 @app.route('/reservas', methods=['POST'])
@@ -327,7 +345,7 @@ def actualizar_usuario(id):
         }), 200
 
     except Exception as e:
-        return jsonify({"ERROR": "ID no válido o error interno", "detalle": str(e)}), 400
+        return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(e)}), 400
 
 ## ACTIVIDAD/ID
 @app.route('/actividades/<id>', methods=['PUT'])
