@@ -155,16 +155,23 @@ def obtener_usuarios():
     usuarios = []
 
     for doc in coleccion.find():
+        # Extraemos la fecha y la formateamos si existe
+        fecha_alta = doc.get('fecha_alta')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(fecha_alta, fecha.datetime):
+            fecha_alta = fecha_alta.isoformat()
+
         usuarios.append({
             "id": str(doc['_id']),
             "nombre_usuario": doc.get('nombre_usuario'),
             "nombre": doc.get('nombre'),
             "apellidos": doc.get('apellidos'),
-            "edad": doc.get('edad'),
             "dni": doc.get('dni'),
             "telefono": doc.get('telefono'),
             "email": doc.get('email'),
-            "rol": doc.get('rol')
+            "rol": doc.get('rol'),
+            "fecha_alta": fecha_alta,
+            "estado_suscripcion": doc.get('estado_suscripcion')
         })
 
     # return jsonify(usuarios), 200 # Devuelve json con campos ordenados alfabéticamente
@@ -183,17 +190,23 @@ def obtener_usuario(id):
         usuario = coleccion.find_one({"_id": ObjectId(id)})
         
         if usuario:
-            # Construimos la respuesta (recuerda que _id no es serializable directamente)
+            # Extraemos la fecha y la formateamos si existe
+            fecha_alta = usuario.get('fecha_alta')
+            # Comprobamos si la variable es de tipo datetime y la convertimos a String
+            if isinstance(fecha_alta, fecha.datetime):
+                fecha_alta = fecha_alta.isoformat()
+
             respuesta = {
                 "id": str(usuario['_id']),
                 "nombre_usuario": usuario.get('nombre_usuario'),
                 "nombre": usuario.get('nombre'),
                 "apellidos": usuario.get('apellidos'),
-                "edad": usuario.get('edad'),
                 "dni": usuario.get('dni'),
                 "telefono": usuario.get('telefono'),
                 "email": usuario.get('email'),
-                "rol": usuario.get('rol')
+                "rol": usuario.get('rol'),
+                "fecha_alta": fecha_alta,
+                "estado_suscripcion": usuario.get('estado_suscripcion')
             }
             # return jsonify(respuesta), 200
             return Response(
