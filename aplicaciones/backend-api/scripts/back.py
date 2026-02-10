@@ -21,7 +21,7 @@ cliente = MongoClient('mongodb+srv://cristianxp_db_user:wpZqcQKcnUl4kGk4@cluster
 db = cliente['gestora']
 
 
-# RUTAS
+# RUTAS INTERNAS PARA ENLAZAR CARPETAS templates Y static
 @app.route('/')
 def vista_principal():
     return render_template('index.html', usuario="Programador")
@@ -134,9 +134,7 @@ def crear_actividad():
         "nombre": nombre,
         "descripcion": datos.get('descripcion', ""),
         "capacidad_maxima": capacidad_maxima,
-        "capacidad_actual": 0,
-        "horario": listaHorariosProcesada,
-        "fecha_creacion": fecha.datetime.now()
+        "horario": listaHorariosProcesada
     }
 
     try:
@@ -155,7 +153,60 @@ def crear_actividad():
 @app.route('/reservas', methods=['POST'])
 def crear_reserva():
     coleccion = db['reservas']
-    pass
+    coleccion_actividades = db['actividades']
+    datos = request.json
+
+    id_usuario = datos.get('id_usuario')
+    id_actividad = datos.get('id_actividad')
+    fecha_sesion_actividad = datos.get('fecha_sesion_actividad')
+
+    if not id_usuario or not id_actividad:
+        return jsonify({"ERROR": "Faltan datos (id_usuario, id_actividad)"}), 400
+
+    try:
+        # Validación preventiva de formato de IDs
+        if not ObjectId.is_valid(id_usuario) or not ObjectId.is_valid(id_actividad):
+            return jsonify({"ERROR": "El formato de los IDs enviados no es válido"}), 400
+
+        # Buscar la actividad para comprobar si hay sitio
+        actividad = coleccion_actividades.find_one({"_id": ObjectId(id_actividad)})
+
+        if not actividad:
+            return jsonify({"ERROR": "La actividad no existe"}), 404
+
+        # Comprobar si hay capacidad disponible
+        capacidad_max = actividad.get('capacidad_max', 0)
+        capacidad_actual = actividad.get('capacidad_actual', 0)
+
+        if capacidad_actual >= capacidad_max:
+            return jsonify({"ERROR": "La actividad está llena"}), 400
+
+        # CREAR LA RESERVA
+        nueva_reserva = {
+            "id_usuario": id_usuario,
+            "id_actividad": id_actividad,
+            "fecha_reserva": fecha.datetime.now(),
+            "fecha_sesion_actividad": fecha_sesion_actividad,
+            "estado": "confirmada" # confirmada/cancelada
+        }
+        
+        id_reserva = coleccion.insert_one(nueva_reserva).inserted_id
+
+        # ACTUALIZAR LA ACTIVIDAD (Sumar +1)
+        # Usamos $inc para sumar 1 al campo capacidad_actual de forma atómica
+        coleccion_actividades.update_one(
+            {"_id": ObjectId(id_actividad)},
+            {"$inc": {"capacidad_actual": 1}}
+        )
+
+        return jsonify({
+            "mensaje": "Reserva realizada con éxito",
+            "id_reserva": str(id_reserva),
+            "nueva_capacidad": capacidad_actual + 1
+        }), 201
+
+    except Exception as e:
+        return jsonify({"ERROR": "ID no válido o error de servidor", "Detalle": str(e)}), 400
 
 ## ASISTENCIA
 @app.route('/asistencias', methods=['POST'])
@@ -246,20 +297,12 @@ def obtener_actividades():
     actividades = []
 
     for doc in coleccion.find():
-        # Extraemos la fecha y la formateamos si existe
-        fecha_creacion = doc.get('fecha_creacion')
-        # Comprobamos si la variable es de tipo datetime y la convertimos a String
-        if isinstance(fecha_creacion, fecha.datetime):
-            fecha_creacion = fecha_creacion.isoformat()
-
         actividades.append({
             "id": str(doc['_id']),
             "nombre": doc.get('nombre'),
             "descripcion": doc.get('descripcion'),
             "capacidad_maxima": doc.get('capacidad_maxima'),
-            "capacidad_actual": doc.get('capacidad_actual'),
-            "horario": doc.get('horario'),
-            "fecha_creacion": fecha_creacion
+            "horario": doc.get('horario')
         })
 
     # return jsonify(actividades), 200 # Devuelve json con campos ordenados alfabéticamente
@@ -277,20 +320,12 @@ def obtener_actividad(id):
         actividad = coleccion.find_one({"_id": ObjectId(id)})
 
         if actividad:
-            # Extraemos la fecha y la formateamos si existe
-            fecha_creacion = actividad.get('fecha_creacion')
-            # Comprobamos si la variable es de tipo datetime y la convertimos a String
-            if isinstance(fecha_creacion, fecha.datetime):
-                fecha_creacion = fecha_creacion.isoformat()
-
             respuesta = {
                 "id": str(actividad['_id']),
                 "nombre": actividad.get('nombre'),
                 "descripcion": actividad.get('descripcion'),
                 "capacidad_maxima": actividad.get('capacidad_maxima'),
-                "capacidad_actual": actividad.get('capacidad_actual'),
-                "horario": actividad.get('horario'),
-                "fecha_creacion": fecha_creacion
+                "horario": actividad.get('horario')
             }
 
             return Response(
@@ -472,6 +507,7 @@ def eliminar_reserva(id):
 def eliminar_asistencia(id):
     coleccion = db['asistencias']
     pass
+
 
 
 if __name__ == '__main__':
