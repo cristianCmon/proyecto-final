@@ -60,3 +60,7 @@ Content-Type: application/json
         }
     ]
 }
+
+
+### DELETE ACTIVIDAD
+DELETE http://localhost:5000/actividades/698b5ba85fa2824bffe3c24e

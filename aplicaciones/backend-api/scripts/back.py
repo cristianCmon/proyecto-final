@@ -410,7 +410,19 @@ def eliminar_usuario(id):
 @app.route('/actividades/<id>', methods=['DELETE'])
 def eliminar_actividad(id):
     coleccion = db['actividades']
-    pass
+
+    try:
+        # Intentamos eliminar el documento que coincida con el ObjectId
+        resultado = coleccion.delete_one({"_id": ObjectId(id)})
+
+        # Si el conteo de eliminados es 1, todo salió bien
+        if resultado.deleted_count == 1:
+            return jsonify({"mensaje": f"Actividad con ID {id} eliminada correctamente"}), 200
+        else:
+            return jsonify({"ERROR": "No se encontró la actividad para eliminar"}), 404
+
+    except Exception as e:
+        return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
 
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['DELETE'])
