@@ -61,6 +61,19 @@ Content-Type: application/json
     ]
 }
 
+### CREAR SESION
+POST http://localhost:5000/actividades/698b5debf1153ae71ea0c839/sesiones
+Content-Type: application/json
+
+### CREAR RESERVA
+POST http://localhost:5000/reservas
+Content-Type: application/json
+
+{
+    "id_usuario": "69823536d6aa1f0615867542",
+    "id_sesion": "698b7c36e5489e175856c5a9"
+}
+
 ### ACTUALIZAR ACTIVIDAD
 PUT http://localhost:5000/actividades/698b5debf1153ae71ea0c839
 Content-Type: application/json

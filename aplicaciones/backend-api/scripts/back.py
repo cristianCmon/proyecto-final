@@ -149,6 +149,47 @@ def crear_actividad():
     except Exception as ex:
         return jsonify({"ERROR": "No se pudo crear la actividad", "Detalle": str(ex)}), 500    
 
+## SESIONES
+@app.route('/actividades/<id>/sesiones', methods=['POST'])
+def crear_sesion(id):
+    actividad = db['actividades'].find_one({"_id": ObjectId(id)})
+
+    if not actividad:
+        return jsonify({"ERROR": "Actividad no encontrada"}), 404
+    
+    # Mapeo de días para Python
+    diasSemana = {"Lunes": 0, "Martes": 1, "Miércoles": 2, "Jueves": 3, "Viernes": 4, "Sábado": 5, "Domingo": 6}
+    horarios = actividad.get('horario', [])
+    hoy = fecha.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    sesionesCreadas = 0
+
+    # Generamos sesiones para los próximos 15 días
+    for i in range(15):
+        fecha_analizada = hoy + fecha.timedelta(days = i)
+        dia_semana_str = list(diasSemana.keys())[list(diasSemana.values()).index(fecha_analizada.weekday())]
+
+        for h in horarios:
+            if h['dia'] == dia_semana_str:
+                # Datos de la sesión individual
+                nueva_sesion = {
+                    "id_actividad": ObjectId(id),
+                    "nombre": actividad['nombre'],
+                    "fecha": fecha_analizada,
+                    "hora_inicio": h['hora_inicio'],
+                    "hora_fin": h['hora_fin'],
+                    "capacidad_maxima": actividad['capacidad_maxima'],
+                    "capacidad_actual": 0,
+                    "estado": "programada"
+                }
+                
+                # Evitar duplicados (mismo día y hora para esa actividad)
+                filtro = {"actividad_id": ObjectId(id), "fecha": fecha_analizada, "hora_inicio": h['hora_inicio']}
+                if not db['sesiones'].find_one(filtro):
+                    db['sesiones'].insert_one(nueva_sesion)
+                    sesionesCreadas += 1
+
+    return jsonify({"mensaje": f"Se han generado {sesionesCreadas} sesiones"}), 201
+
 ## RESERVA
 @app.route('/reservas', methods=['POST'])
 def crear_reserva():
