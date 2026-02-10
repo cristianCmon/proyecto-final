@@ -536,7 +536,39 @@ def eliminar_actividad(id):
 @app.route('/reservas/<id>', methods=['DELETE'])
 def eliminar_reserva(id):
     coleccion = db['reservas']
-    pass
+    coleccionSesiones = db['sesiones']
+
+    try:
+        # Buscamos la reserva para ver su estado actual antes de borrarla
+        reserva = coleccion.find_one({"_id": ObjectId(id)})
+        
+        if not reserva:
+            return jsonify({"ERROR": "Reserva no encontrada"}), 404
+
+        id_sesion = reserva.get('id_sesion')
+        estadoReserva = reserva.get('estado')
+
+        # Eliminamos la reserva de la base de datos
+        resultado = coleccion.delete_one({"_id": ObjectId(id)})
+
+        if resultado.deleted_count == 1:
+            # SOLO restamos si la reserva estaba 'confirmada'
+            if estadoReserva == "confirmada":
+                coleccionSesiones.update_one(
+                    {"_id": ObjectId(id_sesion)},
+                    {"$inc": {"capacidad_actual": -1}}
+                )
+
+                return jsonify({"mensaje": "Reserva eliminada y cupo actualizado"}), 200
+            
+            # Si estaba 'cancelada', la plaza ya se liberó en su momento
+            else:
+                return jsonify({"mensaje": "Reserva eliminada (no hubo cambios en el aforo de la sesión)"}), 200
+        
+        return jsonify({"ERROR": "No se pudo eliminar"}), 500
+
+    except Exception as e:
+        return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
 
 ## ASISTENCIA/ID
 @app.route('/asistencias/<id>', methods=['DELETE'])
