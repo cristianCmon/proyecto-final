@@ -153,40 +153,36 @@ def crear_actividad():
 @app.route('/reservas', methods=['POST'])
 def crear_reserva():
     coleccion = db['reservas']
-    coleccion_actividades = db['actividades']
+    coleccion_sesiones = db['sesiones']
     datos = request.json
 
     id_usuario = datos.get('id_usuario')
-    id_actividad = datos.get('id_actividad')
-    fecha_sesion_actividad = datos.get('fecha_sesion_actividad')
+    id_sesion = datos.get('id_sesion')
+    # fecha_sesion_actividad = datos.get('fecha_sesion_actividad')
 
-    if not id_usuario or not id_actividad:
-        return jsonify({"ERROR": "Faltan datos (id_usuario, id_actividad)"}), 400
+    if not id_usuario or not id_sesion:
+        return jsonify({"ERROR": "Faltan datos (id_usuario, id_sesion)"}), 400
 
     try:
         # Validación preventiva de formato de IDs
-        if not ObjectId.is_valid(id_usuario) or not ObjectId.is_valid(id_actividad):
+        if not ObjectId.is_valid(id_usuario) or not ObjectId.is_valid(id_sesion):
             return jsonify({"ERROR": "El formato de los IDs enviados no es válido"}), 400
 
-        # Buscar la actividad para comprobar si hay sitio
-        actividad = coleccion_actividades.find_one({"_id": ObjectId(id_actividad)})
+        # Buscar la sesion
+        sesion = coleccion_sesiones.find_one({"_id": ObjectId(id_sesion)})
 
-        if not actividad:
-            return jsonify({"ERROR": "La actividad no existe"}), 404
+        if not sesion:
+            return jsonify({"ERROR": "La sesión no existe"}), 404
 
         # Comprobar si hay capacidad disponible
-        capacidad_max = actividad.get('capacidad_max', 0)
-        capacidad_actual = actividad.get('capacidad_actual', 0)
-
-        if capacidad_actual >= capacidad_max:
-            return jsonify({"ERROR": "La actividad está llena"}), 400
+        if sesion['capacidad_actual'] >= sesion['capacidad_maxima']:
+            return jsonify({"ERROR": "La sesión está llena"}), 400
 
         # CREAR LA RESERVA
         nueva_reserva = {
-            "id_usuario": id_usuario,
-            "id_actividad": id_actividad,
+            "id_usuario": ObjectId(id_usuario),
+            "id_sesion": ObjectId(id_sesion),
             "fecha_reserva": fecha.datetime.now(),
-            "fecha_sesion_actividad": fecha_sesion_actividad,
             "estado": "confirmada" # confirmada/cancelada
         }
         
@@ -194,19 +190,18 @@ def crear_reserva():
 
         # ACTUALIZAR LA ACTIVIDAD (Sumar +1)
         # Usamos $inc para sumar 1 al campo capacidad_actual de forma atómica
-        coleccion_actividades.update_one(
-            {"_id": ObjectId(id_actividad)},
+        coleccion_sesiones.update_one(
+            {"_id": ObjectId(id_sesion)},
             {"$inc": {"capacidad_actual": 1}}
         )
 
         return jsonify({
             "mensaje": "Reserva realizada con éxito",
             "id_reserva": str(id_reserva),
-            "nueva_capacidad": capacidad_actual + 1
         }), 201
 
     except Exception as e:
-        return jsonify({"ERROR": "ID no válido o error de servidor", "Detalle": str(e)}), 400
+        return jsonify({"ERROR": "Ha ocurrido un error al intentar hacer la reserva", "Detalle": str(e)}), 400
 
 ## ASISTENCIA
 @app.route('/asistencias', methods=['POST'])
