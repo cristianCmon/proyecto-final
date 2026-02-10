@@ -7,12 +7,13 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 
-# Obtenemos la ruta absoluta de la carpeta donde está este archivo
+# Obtenemos la ruta absoluta de la carpeta donde está el script actual
 base_dir = os.path.dirname(os.path.abspath(__file__))
-# Subimos un nivel si tus templates están fuera de /scripts
+# Subimos un nivel para que pueda reconocer las carpetas templates y static
 template_dir = os.path.join(base_dir, '..', 'templates')
+static_dir = os.path.join(base_dir, '..', 'static')
 
-app = Flask(__name__, template_folder = template_dir)
+app = Flask(__name__, template_folder = template_dir, static_folder = static_dir)
 
 
 # Configuración de MongoDB
