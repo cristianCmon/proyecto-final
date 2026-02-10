@@ -246,10 +246,20 @@ def obtener_actividades():
     actividades = []
 
     for doc in coleccion.find():
+        # Extraemos la fecha y la formateamos si existe
+        fecha_creacion = doc.get('fecha_creacion')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(fecha_creacion, fecha.datetime):
+            fecha_creacion = fecha_creacion.isoformat()
+
         actividades.append({
             "id": str(doc['_id']),
             "nombre": doc.get('nombre'),
-            "descripcion": doc.get('descripcion')
+            "descripcion": doc.get('descripcion'),
+            "capacidad_maxima": doc.get('capacidad_maxima'),
+            "capacidad_actual": doc.get('capacidad_actual'),
+            "horario": doc.get('horario'),
+            "fecha_creacion": fecha_creacion
         })
 
     # return jsonify(actividades), 200 # Devuelve json con campos ordenados alfabéticamente
@@ -262,17 +272,27 @@ def obtener_actividades():
 @app.route('/actividades/<id>', methods=['GET'])
 def obtener_actividad(id):
     coleccion = db['actividades']
+
     try:
         actividad = coleccion.find_one({"_id": ObjectId(id)})
 
         if actividad:
+            # Extraemos la fecha y la formateamos si existe
+            fecha_creacion = actividad.get('fecha_creacion')
+            # Comprobamos si la variable es de tipo datetime y la convertimos a String
+            if isinstance(fecha_creacion, fecha.datetime):
+                fecha_creacion = fecha_creacion.isoformat()
+
             respuesta = {
                 "id": str(actividad['_id']),
                 "nombre": actividad.get('nombre'),
-                "descripcion": actividad.get('descripcion')
+                "descripcion": actividad.get('descripcion'),
+                "capacidad_maxima": actividad.get('capacidad_maxima'),
+                "capacidad_actual": actividad.get('capacidad_actual'),
+                "horario": actividad.get('horario'),
+                "fecha_creacion": fecha_creacion
             }
 
-            # return jsonify(respuesta), 200
             return Response(
                 json.dumps(respuesta, sort_keys=False),
                 mimetype='application/json'
