@@ -61,6 +61,32 @@ Content-Type: application/json
     ]
 }
 
+### ACTUALIZAR ACTIVIDAD
+PUT http://localhost:5000/actividades/698b5debf1153ae71ea0c839
+Content-Type: application/json
 
-### DELETE ACTIVIDAD
+{
+    "nombre": "Boxeo",
+    "descripcion": "Instrucción básica en el noble arte de repartir hostias consagradas",
+    "capacidad_maxima": 20,
+    "horario": [
+        {
+            "dia": "Lunes",
+            "hora_inicio": "10:00",
+            "hora_fin": "11:30"
+        },
+        {
+            "dia": "Miércoles",
+            "hora_inicio": "10:00",
+            "hora_fin": "11:30"
+        },
+        {
+            "dia": "Jueves",
+            "hora_inicio": "12:00",
+            "hora_fin": "13:30"
+        }
+    ]
+}
+
+### BORRAR ACTIVIDAD
 DELETE http://localhost:5000/actividades/698b5ba85fa2824bffe3c24e

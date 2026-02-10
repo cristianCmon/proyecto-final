@@ -338,24 +338,24 @@ def actualizar_usuario(id):
     coleccion = db['usuarios']
 
     try:
-        # 1. Obtener los nuevos datos del cuerpo de la petición
+        # Obtener los nuevos datos del cuerpo de la petición
         datosActualizados = request.json
 
         if not datosActualizados:
-            return jsonify({"error": "No se proporcionaron datos para actualizar"}), 400
+            return jsonify({"ERROR": "No se proporcionaron datos para actualizar"}), 400
 
-        # 2. Si el usuario envía una nueva contraseña, debemos hashearla
+        # Si el usuario envía una nueva contraseña, debemos hashearla
         if 'password' in datosActualizados:
             datosActualizados['password'] = generate_password_hash(datosActualizados['password'])
 
-        # 3. Ejecutar la actualización en MongoDB
+        # Ejecutar la actualización en MongoDB
         # Usamos $set para modificar solo los campos enviados sin borrar el resto
         resultado = coleccion.update_one(
             {"_id": ObjectId(id)},
             {"$set": datosActualizados}
         )
 
-        # 4. Verificar si se encontró y actualizó
+        # Verificar si se encontró y actualizó
         if resultado.matched_count == 0:
             return jsonify({"ERROR": "Usuario no encontrado"}), 404
         
@@ -364,14 +364,51 @@ def actualizar_usuario(id):
             "modificado": resultado.modified_count
         }), 200
 
-    except Exception as e:
-        return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(e)}), 400
+    except Exception as ex:
+        return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(ex)}), 400
 
 ## ACTIVIDAD/ID
 @app.route('/actividades/<id>', methods=['PUT'])
 def actualizar_actividad(id):
     coleccion = db['actividades']
-    pass
+    
+    try:
+        # Obtener datos del cuerpo de la petición
+        datosActualizados = request.json
+
+        if not datosActualizados:
+            return jsonify({"ERROR": "No se proporcionaron datos para actualizar"}), 400
+
+        # Preprocesar datos si es necesario
+        # Si envían capacidad_max, nos aseguramos de que sea entero
+        if 'capacidad_maxima' in datosActualizados:
+            datosActualizados['capacidad_maxima'] = int(datosActualizados['capacidad_maxima'])
+
+        # Si envían horario, validamos que sea una lista (el nuevo formato que definimos)
+        if 'horario' in datosActualizados:
+            if not isinstance(datosActualizados['horario'], list):
+                return jsonify({"ERROR": "El campo 'horario' debe ser una lista"}), 400
+
+        # Ejecutar la actualización
+        resultado = coleccion.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": datosActualizados}
+        )
+
+        # Verificar resultado
+        if resultado.matched_count == 0:
+            return jsonify({"ERROR": "Actividad no encontrada"}), 404
+        
+        return jsonify({
+            "mensaje": "Actividad actualizada con éxito",
+            "detalles": {
+                "encontrados": resultado.matched_count,
+                "modificados": resultado.modified_count
+            }
+        }), 200
+
+    except Exception as ex:
+        return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(ex)}), 400
 
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['PUT'])
