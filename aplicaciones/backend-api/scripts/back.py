@@ -249,6 +249,52 @@ def crear_reserva():
 @app.route('/asistencias', methods=['POST'])
 def crear_asistencia():
     coleccion = db['asistencias']
+    coleccionReservas = db['reservas']
+    datos = request.json
+
+    id_usuario = datos.get('id_usuario')
+    id_sesion = datos.get('id_sesion')
+
+    if not id_usuario or not id_sesion:
+        return jsonify({"ERROR": "Faltan datos (id_usuario, id_sesion)"}), 400
+
+    try:
+        # Verificamos si existe reserva para este usuario y sesión
+        reserva = coleccionReservas.find_one({
+            "id_usuario": ObjectId(id_usuario),
+            "id_sesion": ObjectId(id_sesion),
+            "estado": "confirmada"
+        })
+
+        if not reserva:
+            return jsonify({"ERROR": "No existe una reserva para este usuario/sesión"}), 404
+        
+        # Evitamos duplicados
+        asistenciaPrevia = coleccion.find_one({
+            "id_usuario": ObjectId(id_usuario),
+            "id_sesion": ObjectId(id_sesion)
+        })
+
+        if asistenciaPrevia:
+            return jsonify({"ERROR": "La asistencia ya fue registrada anteriormente"}), 400
+        
+        # Si se pasan las validaciones anteriores creamos registro de asistencia
+        nuevaAsistencia = {
+            "id_usuario": ObjectId(id_usuario),
+            "id_sesion": ObjectId(id_sesion),
+            "id_reserva": reserva['_id'],
+            "check_in": datetime.now()
+        }
+
+        id_insertado = coleccion.insert_one(nuevaAsistencia).inserted_id
+
+        return jsonify({
+            "mensaje": "Asistencia registrada correctamente",
+            "id_asistencia": str(id_insertado)
+        }), 201
+    
+    except Exception as ex:
+        return jsonify({"ERROR": "No se pudo registrar asistencia", "Detalle": str(ex)}), 400
     pass
 
 
@@ -405,7 +451,27 @@ def obtener_reserva(id):
 @app.route('/asistencias', methods=['GET'])
 def obtener_asistencias():
     coleccion = db['asistencias']
-    pass
+    asistencias = []
+
+    for documento in coleccion.find():
+        # Extraemos la fecha y la formateamos si existe
+        check_in = documento.get('check_in')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(check_in, datetime):
+            check_in = check_in.isoformat()
+
+        asistencias.append({
+            "id": str(documento['_id']),
+            "id_usuario": str(documento['id_usuario']),
+            "id_sesion": str(documento['id_sesion']),
+            "id_reserva": str(documento['id_reserva']),
+            "check_in": check_in
+        })
+
+    return Response(
+        json.dumps(asistencias, sort_keys=False),
+        mimetype='application/json'
+    ), 200
 
 ## ASISTENCIA/ID
 @app.route('/asistencias/<id>', methods=['GET'])
