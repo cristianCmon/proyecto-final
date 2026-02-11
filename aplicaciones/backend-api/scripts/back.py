@@ -1,6 +1,7 @@
 import os
 import json
-import datetime as fecha
+import datetime
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, render_template, send_from_directory, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
@@ -86,7 +87,7 @@ def crear_usuario():
         "telefono": datos.get('telefono'),
         "email": email,
         "rol": datos.get('rol'),
-        "fecha_alta": fecha.datetime.now(),
+        "fecha_alta": datetime.now(),
         "estado_suscripcion": True
     }
 
@@ -160,12 +161,12 @@ def crear_sesion(id):
     # Mapeo de días para Python
     diasSemana = {"Lunes": 0, "Martes": 1, "Miércoles": 2, "Jueves": 3, "Viernes": 4, "Sábado": 5, "Domingo": 6}
     horarios = actividad.get('horario', [])
-    hoy = fecha.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     sesionesCreadas = 0
 
     # Generamos sesiones para los próximos 15 días
     for i in range(15):
-        fecha_analizada = hoy + fecha.timedelta(days = i)
+        fecha_analizada = hoy + timedelta(days = i)
         dia_semana_str = list(diasSemana.keys())[list(diasSemana.values()).index(fecha_analizada.weekday())]
 
         for h in horarios:
@@ -223,7 +224,7 @@ def crear_reserva():
         nueva_reserva = {
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
-            "fecha_reserva": fecha.datetime.now(),
+            "fecha_reserva": datetime.now(),
             "estado": "confirmada" # confirmada/cancelada
         }
         
@@ -263,7 +264,7 @@ def obtener_usuarios():
         # Extraemos la fecha y la formateamos si existe
         fecha_alta = doc.get('fecha_alta')
         # Comprobamos si la variable es de tipo datetime y la convertimos a String
-        if isinstance(fecha_alta, fecha.datetime):
+        if isinstance(fecha_alta, datetime):
             fecha_alta = fecha_alta.isoformat()
 
         usuarios.append({
@@ -298,7 +299,7 @@ def obtener_usuario(id):
             # Extraemos la fecha y la formateamos si existe
             fecha_alta = usuario.get('fecha_alta')
             # Comprobamos si la variable es de tipo datetime y la convertimos a String
-            if isinstance(fecha_alta, fecha.datetime):
+            if isinstance(fecha_alta, datetime):
                 fecha_alta = fecha_alta.isoformat()
 
             respuesta = {
