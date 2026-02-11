@@ -376,6 +376,18 @@ def obtener_actividad(id):
         # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
         return jsonify({"ERROR": "ID no válido"}), 400
 
+## SESIONES
+@app.route('/sesiones', methods=['GET'])
+def obtener_sesiones():
+    coleccion = db['sesiones']
+    pass
+
+## SESION/ID
+@app.route('/sesiones/<id>', methods=['GET'])
+def obtener_sesion(id):
+    coleccion = db['sesiones']
+    pass
+
 ## RESERVAS
 @app.route('/reservas', methods=['GET'])
 def obtener_reservas():
@@ -481,6 +493,12 @@ def actualizar_actividad(id):
     except Exception as ex:
         return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(ex)}), 400
 
+## SESION/ID
+@app.route('/sesiones/<id>', methods=['PUT'])
+def actualizar_sesion(id):
+    coleccion = db['sesiones']
+    pass
+
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['PUT'])
 def actualizar_reserva(id):
@@ -531,6 +549,12 @@ def eliminar_actividad(id):
 
     except Exception as e:
         return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
+
+## SESION/ID
+@app.route('/sesiones/<id>', methods=['DELETE'])
+def eliminar_sesion(id):
+    coleccion = db['sesiones']
+    pass
 
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['DELETE'])
