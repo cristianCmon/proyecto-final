@@ -229,7 +229,7 @@ def crear_reserva():
         
         id_reserva = coleccion.insert_one(nuevaReserva).inserted_id
 
-        # Actualizamos usando $inc para sumar +1 al campo capacidad_actual de forma atómica
+        # INCREMENTAMOS +1 A capacidad_actual EN LA SESIÓN USANDO $inc
         coleccionSesiones.update_one(
             {"_id": ObjectId(id_sesion)},
             {"$inc": {"capacidad_actual": 1}}
@@ -693,19 +693,96 @@ def actualizar_actividad(id):
 @app.route('/sesiones/<id>', methods=['PUT'])
 def actualizar_sesion(id):
     coleccion = db['sesiones']
-    pass
+    
+    try:
+        datos = request.json
+
+        if not datos:
+            return jsonify({"ERROR": "No hay datos para actualizar"}), 400
+
+        # Si actualizan capacidad, forzar valor entero
+        if 'capacidad_maxima' in datos:
+            datos['capacidad_maxima'] = int(datos['capacidad_maxima'])
+
+        resultado = coleccion.update_one({"_id": ObjectId(id)}, {"$set": datos})
+
+        if resultado.matched_count == 0:
+            return jsonify({"ERROR": "Sesión no encontrada"}), 404
+        
+        # Lo normal es actualizar estado (programada, finalizada, cancelada)
+        return jsonify({"mensaje": "Sesión actualizada correctamente"}), 200
+    
+    except Exception as ex:
+        return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(ex)}), 400
 
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['PUT'])
 def actualizar_reserva(id):
     coleccion = db['reservas']
-    pass
+    coleccionSesiones = db['sesiones']
+    
+    try:
+        datos = request.json
+
+        if not datos:
+            return jsonify({"ERROR": "No hay datos para actualizar"}), 400
+
+        # Buscamos reserva actual para conocer su estado y la sesión vinculada
+        reservaActual = coleccion.find_one({"_id": ObjectId(id)})
+        
+        if not reservaActual:
+            return jsonify({"ERROR": "Reserva no encontrada"}), 404
+
+        nuevoEstadoReserva = datos.get('estado')
+        anteriorEstadoReserva = reservaActual.get('estado')
+        id_sesion = reservaActual.get('id_sesion')
+
+        # Actualización de plazas ($inc)
+        # Si la reserva cambia de 'confirmada' a 'cancelada', liberamos plaza (-1)
+        if anteriorEstadoReserva == "confirmada" and nuevoEstadoReserva == "cancelada":
+            coleccionSesiones.update_one(
+                {"_id": id_sesion},
+                {"$inc": {"capacidad_actual": -1}}
+            )
+        
+        # Si por alguna razón se reactiva una reserva (de 'cancelada' a 'confirmada')
+        elif anteriorEstadoReserva == "cancelada" and nuevoEstadoReserva == "confirmada":
+            # (Opcional) Se puede validar primero si hay plaza disponible antes de sumar
+            coleccionSesiones.update_one(
+                {"_id": id_sesion},
+                {"$inc": {"capacidad_actual": 1}}
+            )
+
+        # 3. Actualizamos la reserva en la base de datos
+        resultado = coleccion.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": datos}
+        )
+
+        return jsonify({
+            "mensaje": "Reserva actualizada correctamente",
+            "cupo_modificado": (anteriorEstadoReserva != nuevoEstadoReserva)
+        }), 200
+
+    except Exception as ex:
+        return jsonify({"ERROR": "ID no válido o error interno", "Detalle": str(ex)}), 400
 
 ## ASISTENCIA/ID
 @app.route('/asistencias/<id>', methods=['PUT'])
 def actualizar_asistencia(id):
     coleccion = db['asistencias']
-    pass
+    
+    try:
+        datos = request.json
+        resultado = coleccion.update_one({"_id": ObjectId(id)}, {"$set": datos})
+
+        if resultado.matched_count == 0:
+            return jsonify({"ERROR": "Registro de asistencia no encontrado"}), 404
+
+        return jsonify({"mensaje": "Asistencia actualizada"}), 200
+    
+    except Exception as ex:
+        return jsonify({"ERROR": "ID no válido", "Detalle": str(ex)}), 400
 
 
 #### MÉTODOS DELETE ####
