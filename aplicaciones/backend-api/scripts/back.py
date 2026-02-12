@@ -495,13 +495,62 @@ def obtener_sesion(id):
 @app.route('/reservas', methods=['GET'])
 def obtener_reservas():
     coleccion = db['reservas']
-    pass
+    
+    reservas = []
+
+    for documento in coleccion.find():
+        # Extraemos la fecha y la formateamos si existe
+        fechaReserva = documento.get('fecha_reserva')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(fechaReserva, datetime):
+            fechaReserva = fechaReserva.isoformat()
+
+        reservas.append({
+            "id": str(documento['_id']),
+            "id_usuario": str(documento['id_usuario']),
+            "id_sesion": str(documento['id_sesion']),
+            "fecha_reserva": fechaReserva,
+            "estado": documento.get('estado')
+        })
+
+    return Response(
+        json.dumps(reservas, sort_keys=False),
+        mimetype='application/json'
+    ), 200
 
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['GET'])
 def obtener_reserva(id):
     coleccion = db['reservas']
-    pass
+    
+    try:
+        reserva = coleccion.find_one({"_id": ObjectId(id)})
+        # Extraemos la fecha y la formateamos si existe
+        fechaReserva = reserva.get('fecha_reserva')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(fechaReserva, datetime):
+            fechaReserva = fechaReserva.isoformat()
+
+        if reserva:
+            respuesta = {
+                "id": str(reserva['_id']),
+                "id_usuario": str(reserva['id_usuario']),
+                "id_sesion": str(reserva['id_sesion']),
+                "fecha_reserva": fechaReserva,
+                "estado": reserva.get('estado')
+            }
+
+            return Response(
+                json.dumps(respuesta, sort_keys=False),
+                mimetype='application/json'
+            ), 200
+        
+        else:
+            return jsonify({"ERROR": "Reserva no encontrada"}), 404
+    
+    except Exception as e:
+        # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
+        return jsonify({"ERROR": "ID no válido"}), 400
 
 ## ASISTENCIAS
 @app.route('/asistencias', methods=['GET'])
