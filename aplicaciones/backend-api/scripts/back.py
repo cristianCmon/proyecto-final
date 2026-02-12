@@ -427,13 +427,69 @@ def obtener_actividad(id):
 @app.route('/sesiones', methods=['GET'])
 def obtener_sesiones():
     coleccion = db['sesiones']
-    pass
+    sesiones = []
+
+    for documento in coleccion.find():
+        # Extraemos la fecha y la formateamos si existe
+        fechaSesion = documento.get('fecha')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(fechaSesion, datetime):
+            fechaSesion = fechaSesion.isoformat()
+
+        sesiones.append({
+            "id": str(documento['_id']),
+            "id_actividad": str(documento['id_actividad']),
+            "nombre": documento['nombre'],
+            "fecha": fechaSesion,
+            "hora_inicio": documento['hora_inicio'],
+            "hora_fin": documento['hora_fin'],
+            "capacidad_maxima": documento['capacidad_maxima'],
+            "capacidad_actual": documento['capacidad_actual'],
+            "estado": documento['estado']
+        })
+    
+    return Response(
+        json.dumps(sesiones, sort_keys=False),
+        mimetype='application/json'
+    ), 200
 
 ## SESION/ID
 @app.route('/sesiones/<id>', methods=['GET'])
 def obtener_sesion(id):
     coleccion = db['sesiones']
-    pass
+    
+    try:
+        sesion = coleccion.find_one({"_id": ObjectId(id)})
+        # Extraemos la fecha y la formateamos si existe
+        fechaSesion = sesion.get('fecha')
+        # Comprobamos si la variable es de tipo datetime y la convertimos a String
+        if isinstance(fechaSesion, datetime):
+            fechaSesion = fechaSesion.isoformat()
+
+        if sesion:
+            respuesta = {
+                "id": str(sesion['_id']),
+                "id_actividad": str(sesion['id_actividad']),
+                "nombre": sesion['nombre'],
+                "fecha": fechaSesion,
+                "hora_inicio": sesion['hora_inicio'],
+                "hora_fin": sesion['hora_fin'],
+                "capacidad_maxima": sesion['capacidad_maxima'],
+                "capacidad_actual": sesion['capacidad_actual'],
+                "estado": sesion['estado']
+            }
+
+            return Response(
+                json.dumps(respuesta, sort_keys=False),
+                mimetype='application/json'
+            ), 200
+        
+        else:
+            return jsonify({"ERROR": "Sesión no encontrada"}), 404
+    
+    except Exception as e:
+        # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
+        return jsonify({"ERROR": "ID no válido"}), 400
 
 ## RESERVAS
 @app.route('/reservas', methods=['GET'])
