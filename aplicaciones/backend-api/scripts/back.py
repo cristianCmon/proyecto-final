@@ -245,7 +245,7 @@ def crear_reserva():
 
 ## ASISTENCIA
 @app.route('/asistencias', methods=['POST'])
-def crear_asistencia():
+def crear_asistencia(): #TODO AÑADIR CAMPO ESTADO
     coleccion = db['asistencias']
     coleccionReservas = db['reservas']
     datos = request.json
