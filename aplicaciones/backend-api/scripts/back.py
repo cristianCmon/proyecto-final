@@ -33,7 +33,6 @@ def favicon():
         'favicon-32x32.png', mimetype='image/vnd.microsoft.icon')
 
 
-
 #### MÉTODOS POST ####
 
 ## USUARIO
@@ -161,7 +160,7 @@ def crear_sesion(id):
     # Mapeo de días para Python
     diasSemana = {"Lunes": 0, "Martes": 1, "Miércoles": 2, "Jueves": 3, "Viernes": 4, "Sábado": 5, "Domingo": 6}
     horarios = actividad.get('horario', [])
-    hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    hoy = datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
     sesionesCreadas = 0
 
     # Generamos sesiones para los próximos 15 días
@@ -185,6 +184,7 @@ def crear_sesion(id):
                 
                 # Evitar duplicados (mismo día y hora para esa actividad)
                 filtro = {"actividad_id": ObjectId(id), "fecha": fecha_analizada, "hora_inicio": h['hora_inicio']}
+
                 if not db['sesiones'].find_one(filtro):
                     db['sesiones'].insert_one(nueva_sesion)
                     sesionesCreadas += 1
@@ -195,12 +195,11 @@ def crear_sesion(id):
 @app.route('/reservas', methods=['POST'])
 def crear_reserva():
     coleccion = db['reservas']
-    coleccion_sesiones = db['sesiones']
+    coleccionSesiones = db['sesiones']
     datos = request.json
 
     id_usuario = datos.get('id_usuario')
     id_sesion = datos.get('id_sesion')
-    # fecha_sesion_actividad = datos.get('fecha_sesion_actividad')
 
     if not id_usuario or not id_sesion:
         return jsonify({"ERROR": "Faltan datos (id_usuario, id_sesion)"}), 400
@@ -210,29 +209,28 @@ def crear_reserva():
         if not ObjectId.is_valid(id_usuario) or not ObjectId.is_valid(id_sesion):
             return jsonify({"ERROR": "El formato de los IDs enviados no es válido"}), 400
 
-        # Buscar la sesion
-        sesion = coleccion_sesiones.find_one({"_id": ObjectId(id_sesion)})
+        # Buscamos sesión
+        sesion = coleccionSesiones.find_one({"_id": ObjectId(id_sesion)})
 
         if not sesion:
             return jsonify({"ERROR": "La sesión no existe"}), 404
 
-        # Comprobar si hay capacidad disponible
+        # Comprobamos si hay capacidad disponible
         if sesion['capacidad_actual'] >= sesion['capacidad_maxima']:
             return jsonify({"ERROR": "La sesión está llena"}), 400
 
-        # CREAR LA RESERVA
-        nueva_reserva = {
+        # Creamos la reserva
+        nuevaReserva = {
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
             "fecha_reserva": datetime.now(),
             "estado": "confirmada" # confirmada/cancelada
         }
         
-        id_reserva = coleccion.insert_one(nueva_reserva).inserted_id
+        id_reserva = coleccion.insert_one(nuevaReserva).inserted_id
 
-        # ACTUALIZAR LA ACTIVIDAD (Sumar +1)
-        # Usamos $inc para sumar 1 al campo capacidad_actual de forma atómica
-        coleccion_sesiones.update_one(
+        # Actualizamos usando $inc para sumar +1 al campo capacidad_actual de forma atómica
+        coleccionSesiones.update_one(
             {"_id": ObjectId(id_sesion)},
             {"$inc": {"capacidad_actual": 1}}
         )
@@ -278,7 +276,7 @@ def crear_asistencia():
         if asistenciaPrevia:
             return jsonify({"ERROR": "La asistencia ya fue registrada anteriormente"}), 400
         
-        # Si se pasan las validaciones anteriores creamos registro de asistencia
+        # Si se superan las validaciones anteriores creamos registro de asistencia
         nuevaAsistencia = {
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
@@ -295,7 +293,6 @@ def crear_asistencia():
     
     except Exception as ex:
         return jsonify({"ERROR": "No se pudo registrar asistencia", "Detalle": str(ex)}), 400
-    pass
 
 
 #### MÉTODOS GET ####
@@ -326,7 +323,7 @@ def obtener_usuarios():
             "estado_suscripcion": doc.get('estado_suscripcion')
         })
 
-    # return jsonify(usuarios), 200 # Devuelve json con campos ordenados alfabéticamente
+    # Devuelve json con campos ordenados alfabéticamente
     return Response(
         json.dumps(usuarios, sort_keys=False),
         mimetype='application/json'
@@ -360,7 +357,7 @@ def obtener_usuario(id):
                 "fecha_alta": fecha_alta,
                 "estado_suscripcion": usuario.get('estado_suscripcion')
             }
-            # return jsonify(respuesta), 200
+
             return Response(
                 json.dumps(respuesta, sort_keys=False),
                 mimetype='application/json'
@@ -388,7 +385,7 @@ def obtener_actividades():
             "horario": doc.get('horario')
         })
 
-    # return jsonify(actividades), 200 # Devuelve json con campos ordenados alfabéticamente
+    # Devuelve json con campos ordenados alfabéticamente
     return Response(
         json.dumps(actividades, sort_keys=False),
         mimetype='application/json'
@@ -495,7 +492,6 @@ def obtener_sesion(id):
 @app.route('/reservas', methods=['GET'])
 def obtener_reservas():
     coleccion = db['reservas']
-    
     reservas = []
 
     for documento in coleccion.find():
@@ -761,7 +757,7 @@ def eliminar_sesion(id):
         resultado = coleccion.delete_one({"_id": ObjectId(id)})
 
         if resultado.deleted_count == 1:
-            # Borramos todas las reservas asociadas a dicha sesión
+            # Borramos en cascada TODAS LAS RESERVAS ASOCIADAS a dicha sesión
             coleccionReservas.delete_many({"id_sesion": ObjectId(id)})
             return jsonify({"mensaje": "Sesión y reservas asociadas eliminadas"}), 200
         
@@ -831,8 +827,6 @@ if __name__ == '__main__':
     print('\nIniciando Backend...\n')
     # app.run(debug = True, use_reloader = False)
     app.run(debug = True)
-
-# python -m back
 
 # GUÍAS
 # https://j2logo.com/leccion-1-la-primera-aplicacion-flask/
