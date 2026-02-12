@@ -754,7 +754,22 @@ def eliminar_actividad(id):
 @app.route('/sesiones/<id>', methods=['DELETE'])
 def eliminar_sesion(id):
     coleccion = db['sesiones']
-    pass
+    coleccionReservas = db['reservas']
+
+    try:
+        # Borramos sesión
+        resultado = coleccion.delete_one({"_id": ObjectId(id)})
+
+        if resultado.deleted_count == 1:
+            # Borramos todas las reservas asociadas a dicha sesión
+            coleccionReservas.delete_many({"id_sesion": ObjectId(id)})
+            return jsonify({"mensaje": "Sesión y reservas asociadas eliminadas"}), 200
+        
+        else:
+            return jsonify({"ERROR": "No se encontró la sesión"}), 404
+        
+    except Exception as e:
+        return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
 
 ## RESERVA/ID
 @app.route('/reservas/<id>', methods=['DELETE'])
@@ -798,7 +813,17 @@ def eliminar_reserva(id):
 @app.route('/asistencias/<id>', methods=['DELETE'])
 def eliminar_asistencia(id):
     coleccion = db['asistencias']
-    pass
+    
+    try:
+        resultado = coleccion.delete_one({"_id": ObjectId(id)})
+
+        if resultado.deleted_count == 1:
+            return jsonify({"mensaje": "Registro de asistencia eliminado"}), 200
+        
+        return jsonify({"ERROR": "No se encontró la asistencia"}), 404
+    
+    except Exception as e:
+        return jsonify({"ERROR": "ID no válido", "Detalle": str(e)}), 400
 
 
 

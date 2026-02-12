@@ -71,7 +71,7 @@ Content-Type: application/json
 
 {
     "id_usuario": "69823536d6aa1f0615867542",
-    "id_sesion": "698b7c36e5489e175856c5a9"
+    "id_sesion": "698de7c1b2cca1f5f61130ce"
 }
 
 ### CREAR ASISTENCIA
@@ -112,3 +112,12 @@ Content-Type: application/json
 
 ### BORRAR ACTIVIDAD
 DELETE http://localhost:5000/actividades/698b5ba85fa2824bffe3c24e
+
+### BORRAR RESERVA
+DELETE http://localhost:5000/reservas/698b7ecc52633597fdce522f
+
+### BORRAR ASISTENCIA
+DELETE http://localhost:5000/asistencias/
+
+### BORRAR SESIÓN
+DELETE http://localhost:5000/sesiones/698de7c1b2cca1f5f61130ce
