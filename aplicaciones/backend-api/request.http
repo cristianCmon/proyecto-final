@@ -71,7 +71,7 @@ Content-Type: application/json
 
 {
     "id_usuario": "69823536d6aa1f0615867542",
-    "id_sesion": "698de7c1b2cca1f5f61130ce"
+    "id_sesion": "698de7c1b2cca1f5f61130cf"
 }
 
 ### CREAR ASISTENCIA
@@ -80,7 +80,7 @@ Content-Type: application/json
 
 {
     "id_usuario": "69823536d6aa1f0615867542",
-    "id_sesion": "698b7c36e5489e175856c5a9"
+    "id_sesion": "698de7c1b2cca1f5f61130cf"
 }
 
 ### ACTUALIZAR ACTIVIDAD

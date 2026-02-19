@@ -281,7 +281,7 @@ def crear_asistencia(): #TODO AÑADIR CAMPO ESTADO
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
             "id_reserva": reserva['_id'],
-            "check_in": datetime.now()
+            "estado": "Presente" # Presente/No presente/Cancelada
         }
 
         id_insertado = coleccion.insert_one(nuevaAsistencia).inserted_id
@@ -771,9 +771,12 @@ def actualizar_reserva(id):
 @app.route('/asistencias/<id>', methods=['PUT'])
 def actualizar_asistencia(id):
     coleccion = db['asistencias']
+    coleccionSesiones = db['sesiones']
+    coleccionReservas = db['reservas']
     
     try:
         datos = request.json
+        nuevoEstado = datos.get('estado')
         resultado = coleccion.update_one({"_id": ObjectId(id)}, {"$set": datos})
 
         if resultado.matched_count == 0:
@@ -782,7 +785,7 @@ def actualizar_asistencia(id):
         return jsonify({"mensaje": "Asistencia actualizada"}), 200
     
     except Exception as ex:
-        return jsonify({"ERROR": "ID no válido", "Detalle": str(ex)}), 400
+        return jsonify({"ERROR": "No se pudo modificar la asistencia", "Detalle": str(ex)}), 400
 
 
 #### MÉTODOS DELETE ####
