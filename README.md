@@ -11,7 +11,7 @@ deactivate (para salir una vez dentro)
 
 ### Para instalar dependencias (dentro de entorno virtual)
 pip install flask pymongo
-pip install Flask-JWT-Extended
+pip install flask-bcrypt flask-jwt-extended zon
 
 ### Para ejecutar el script de la API
 python scripts/back.py
