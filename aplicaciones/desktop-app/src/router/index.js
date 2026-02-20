@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import Login from '../views/LoginUsuario.vue';
 import Registro from '../views/RegistroUsuario.vue';
 import Layout from '../layouts/AutorizacionLayout.vue';
+import Dashboard from '../views/Dashboard.vue';
 
 // Definimos rutas
 const routes = [
@@ -12,7 +13,8 @@ const routes = [
     component: Layout,
     children: [
       { path: '', name: 'Login', component: Login },
-      { path: 'registro', name: 'Registro', component: Registro }
+      { path: 'registro', name: 'Registro', component: Registro },
+      { path: 'dashboard', name: 'Dashboard', component: Dashboard }
     ]
   }
   // {
