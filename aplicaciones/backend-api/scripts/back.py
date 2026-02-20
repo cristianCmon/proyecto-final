@@ -196,6 +196,7 @@ def crear_sesion(id):
 def crear_reserva():
     coleccion = db['reservas']
     coleccionSesiones = db['sesiones']
+    coleccionAsistencias = db['asistencias']
     datos = request.json
 
     id_usuario = datos.get('id_usuario')
@@ -209,6 +210,17 @@ def crear_reserva():
         if not ObjectId.is_valid(id_usuario) or not ObjectId.is_valid(id_sesion):
             return jsonify({"ERROR": "El formato de los IDs enviados no es válido"}), 400
 
+        # Comprobamos si el usuario ya ha reservado para evitar duplicados
+        reservaPrevia = coleccion.find_one({
+            "id_usuario": ObjectId(id_usuario),
+            "id_sesion": ObjectId(id_sesion),
+            "estado": "Confirmada"
+        })
+
+        if reservaPrevia:
+            # Si existiese la reserva devolvemos un error 409
+            return jsonify({"ERROR": "Se ha prevenido duplicado de reserva para misma sesión"}), 409
+        
         # Buscamos sesión
         sesion = coleccionSesiones.find_one({"_id": ObjectId(id_sesion)})
 
@@ -224,10 +236,20 @@ def crear_reserva():
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
             "fecha_reserva": datetime.now(),
-            "estado": "confirmada" # confirmada/cancelada
+            "estado": "Confirmada" # Confirmada/Cancelada
         }
         
         id_reserva = coleccion.insert_one(nuevaReserva).inserted_id
+
+        # Generamos automáticamente el registro de asistencia
+        nuevaAsistencia = {
+            "id_usuario": ObjectId(id_usuario),
+            "id_sesion": ObjectId(id_sesion),
+            "id_reserva": id_reserva,
+            "estado": "Presente" # Presente/No presente/Cancelada
+        }
+
+        coleccionAsistencias.insert_one(nuevaAsistencia)
 
         # INCREMENTAMOS +1 A capacidad_actual EN LA SESIÓN USANDO $inc
         coleccionSesiones.update_one(
@@ -245,7 +267,7 @@ def crear_reserva():
 
 ## ASISTENCIA
 @app.route('/asistencias', methods=['POST'])
-def crear_asistencia(): #TODO AÑADIR CAMPO ESTADO
+def crear_asistencia():
     coleccion = db['asistencias']
     coleccionReservas = db['reservas']
     datos = request.json
@@ -261,7 +283,7 @@ def crear_asistencia(): #TODO AÑADIR CAMPO ESTADO
         reserva = coleccionReservas.find_one({
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
-            "estado": "confirmada"
+            "estado": "Confirmada"
         })
 
         if not reserva:
@@ -720,6 +742,7 @@ def actualizar_sesion(id):
 def actualizar_reserva(id):
     coleccion = db['reservas']
     coleccionSesiones = db['sesiones']
+    coleccionAsistencias = db['asistencias']
     
     try:
         datos = request.json
@@ -737,31 +760,58 @@ def actualizar_reserva(id):
         anteriorEstadoReserva = reservaActual.get('estado')
         id_sesion = reservaActual.get('id_sesion')
 
+        # Esta variable determinará si al final del filtrado se cancela o no la reserva
+        seCancelaReserva = True
+
         # Actualización de plazas ($inc)
-        # Si la reserva cambia de 'confirmada' a 'cancelada', liberamos plaza (-1)
-        if anteriorEstadoReserva == "confirmada" and nuevoEstadoReserva == "cancelada":
-            coleccionSesiones.update_one(
-                {"_id": id_sesion},
-                {"$inc": {"capacidad_actual": -1}}
-            )
-        
-        # Si por alguna razón se reactiva una reserva (de 'cancelada' a 'confirmada')
-        elif anteriorEstadoReserva == "cancelada" and nuevoEstadoReserva == "confirmada":
-            # (Opcional) Se puede validar primero si hay plaza disponible antes de sumar
-            coleccionSesiones.update_one(
-                {"_id": id_sesion},
-                {"$inc": {"capacidad_actual": 1}}
+        # Si la reserva cambia de 'Confirmada' a 'Cancelada', liberamos plaza (-1)
+        if anteriorEstadoReserva == "Confirmada" and nuevoEstadoReserva == "Cancelada":
+            # Obtenemos datos de sesión para saber hora de inicio
+            sesion = coleccionSesiones.find_one({"_id": id_sesion})
+
+            # Preparamos variable horaSesion
+            h, m = map(int, sesion['hora_inicio'].split(':'))
+            horaSesion = sesion['fecha'].replace(hour = h, minute = m, second = 0, microsecond = 0)
+
+            # Preparamos el espacio de tiempo de la cancelación
+            horaActual = datetime.now()
+            tiempoCancelacion = horaSesion - horaActual
+
+            # Comprobamos el límite de tiempo
+            if tiempoCancelacion > timedelta(minutes = 15):
+                # Si se cancela hasta 15 minutos del inicio de la sesión se libera la plaza
+                coleccionSesiones.update_one({"_id": id_sesion}, {"$inc": {"capacidad_actual": -1}})
+                estadoAsistencia = "Cancelada"
+            
+            else:
+                # Si se cancela cuando faltan 15 minutos o menos para el comienzo de la sesión no se libera plaza
+                estadoAsistencia = "No presente"
+                seCancelaReserva = False
+                mensajeEstado = "No se ha cancelado la reserva por aviso tardío, la plaza sigue ocupada"
+
+            # Actualizamos estado de asistencia
+            coleccionAsistencias.update_one(
+                {"id_reserva": ObjectId(id)},
+                {"$set": {
+                    "id_usuario": reservaActual['id_usuario'],
+                    "id_sesion": id_sesion,
+                    "estado": estadoAsistencia
+                }},
+                upsert = True # Forzamos
             )
 
-        # 3. Actualizamos la reserva en la base de datos
-        resultado = coleccion.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": datos}
-        )
+        # Sólo se actualiza la reserva si se ha hecho a tiempo, sino se mantiene 'Confirmada'
+        if seCancelaReserva:
+            # Actualizamos reserva en base de datos
+            coleccion.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": datos}
+            )
+            mensajeEstado = "Reserva cancelada a tiempo, plaza liberada"
 
         return jsonify({
-            "mensaje": "Reserva actualizada correctamente",
-            "cupo_modificado": (anteriorEstadoReserva != nuevoEstadoReserva)
+            "mensaje": mensajeEstado,
+            "modificado": seCancelaReserva
         }), 200
 
     except Exception as ex:
@@ -771,12 +821,9 @@ def actualizar_reserva(id):
 @app.route('/asistencias/<id>', methods=['PUT'])
 def actualizar_asistencia(id):
     coleccion = db['asistencias']
-    coleccionSesiones = db['sesiones']
-    coleccionReservas = db['reservas']
     
     try:
         datos = request.json
-        nuevoEstado = datos.get('estado')
         resultado = coleccion.update_one({"_id": ObjectId(id)}, {"$set": datos})
 
         if resultado.matched_count == 0:
@@ -785,7 +832,7 @@ def actualizar_asistencia(id):
         return jsonify({"mensaje": "Asistencia actualizada"}), 200
     
     except Exception as ex:
-        return jsonify({"ERROR": "No se pudo modificar la asistencia", "Detalle": str(ex)}), 400
+        return jsonify({"ERROR": "ID no válido", "Detalle": str(ex)}), 400
 
 
 #### MÉTODOS DELETE ####

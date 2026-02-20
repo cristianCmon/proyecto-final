@@ -70,7 +70,7 @@ POST http://localhost:5000/reservas
 Content-Type: application/json
 
 {
-    "id_usuario": "69823536d6aa1f0615867542",
+    "id_usuario": "698a0fe523c03b02b2a706bb",
     "id_sesion": "698de7c1b2cca1f5f61130cf"
 }
 
@@ -79,7 +79,7 @@ POST http://localhost:5000/asistencias
 Content-Type: application/json
 
 {
-    "id_usuario": "69823536d6aa1f0615867542",
+    "id_usuario": "698a0fe523c03b02b2a706bb",
     "id_sesion": "698de7c1b2cca1f5f61130cf"
 }
 
@@ -108,6 +108,14 @@ Content-Type: application/json
             "hora_fin": "13:30"
         }
     ]
+}
+
+### ACTUALIZAR RESERVA
+PUT http://localhost:5000/reservas/699825958671aac59d19e6ec
+Content-Type: application/json
+
+{
+    "estado": "Cancelada"
 }
 
 ### BORRAR ACTIVIDAD
