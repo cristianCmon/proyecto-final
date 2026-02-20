@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import api from '../api';
+import { apiFetch } from '../api';
 
 export default {
   data() {
@@ -24,17 +24,19 @@ export default {
   methods: {
     async handleLogin() {
       try {
-        const response = await api.post('/auth/login', {
-          nombre_usuario: this.usuario,
-          contraseña: this.password
+        const data = await apiFetch('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            nombre_usuario: this.usuario,
+            contraseña: this.password // Tal cual lo espera tu Flask
+          })
         });
         
-        // Guardamos el token que genera tu Flask
-        localStorage.setItem('user-token', response.data.token);
-        // Redirigir a la vista principal
+        localStorage.setItem('user-token', data.token);
         this.$router.push('/dashboard');
       } catch (err) {
-        this.error = err.response?.data?.ERROR || "Error al conectar con el servidor";
+        // 'err' aquí es el JSON de error que envía tu Flask (p.ej. {"ERROR": "..."})
+        this.error = err.ERROR || "Error en el servidor";
       }
     }
   }

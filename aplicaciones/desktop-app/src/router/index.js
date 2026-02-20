@@ -1,32 +1,34 @@
-const BASE_URL = 'http://127.0.0.1:5000';
+import { createRouter, createWebHashHistory } from 'vue-router';
 
-export const apiFetch = async (endpoint, options = {}) => {
-  const url = `${BASE_URL}${endpoint}`;
-  
-  // Configuramos cabeceras por defecto
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+// Importamos las vistas
+import Login from '../views/Login.vue';
+import Registro from '../views/Registro.vue';
 
-  // Si tenemos un token guardado, lo añadimos automáticamente
-  const token = localStorage.getItem('user-token');
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+// Definimos rutas
+const routes = [
+  {
+    path: '/',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/registro',
+    name: 'Registro',
+    component: Registro
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    // Carga perezosa (lazy loading) para mejorar el rendimiento
+    component: () => import('../views/Dashboard.vue') 
   }
+];
 
-  const response = await fetch(url, {
-    ...options,
-    headers
-  });
+// Creamos la instancia del Router
+const router = createRouter({
+  // AQUÍ ESTÁ LA CLAVE PARA ELECTRON:
+  history: createWebHashHistory(),
+  routes
+});
 
-  // Fetch no lanza error en códigos 400 o 500, hay que manejarlo a mano
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw errorData; 
-  }
-
-  return response.json();
-};
-
-// TODO REVISAR
+export default router;
