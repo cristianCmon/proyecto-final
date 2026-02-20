@@ -915,7 +915,7 @@ def eliminar_reserva(id):
 
         if resultado.deleted_count == 1:
             # SOLO restamos si la reserva estaba 'confirmada'
-            if estadoReserva == "confirmada":
+            if estadoReserva == "Confirmada":
                 coleccionSesiones.update_one(
                     {"_id": ObjectId(id_sesion)},
                     {"$inc": {"capacidad_actual": -1}}
