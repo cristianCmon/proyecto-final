@@ -6,6 +6,9 @@ from flask import Flask, request, jsonify, render_template, send_from_directory,
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from validaciones import validacionRegistro, validacionLogin
 
 
 # Obtenemos la ruta absoluta de la carpeta donde está el script actual
@@ -16,6 +19,10 @@ static_dir = os.path.join(base_dir, '..', 'static')
 
 app = Flask(__name__, template_folder = template_dir, static_folder = static_dir)
 
+# IMPLEMENTACIÓN BCRYPT + JWT PARA ROBER
+bcrypt = Bcrypt(app)
+app.config['JWT_SECRET_KEY'] = 'CONTRASEÑA_de_prueba_!*1'
+jwt = JWTManager(app)
 
 # Configuración de MongoDB
 cliente = MongoClient('mongodb+srv://cristianxp_db_user:wpZqcQKcnUl4kGk4@cluster0.mdf0qyj.mongodb.net/')
@@ -35,7 +42,117 @@ def favicon():
 
 #### MÉTODOS POST ####
 
-## USUARIO
+## REGISTRAR USUARIO EN APP
+@app.route('/auth/registro', methods=['POST'])
+def registroUsuario():
+    coleccion = db['usuarios']
+    datos = request.json
+
+    # VALIDACIONES
+    try:
+        # Intentamos validar los datos obtenidos del registro
+        datos = validacionRegistro.validate(datos)
+    except Exception as e:
+        # Si hay un error se especificará de forma detallada
+        return jsonify({"ERROR": "Validación fallida", "detalle": str(e)}), 400
+    
+    # COMPROBACIONES
+    # Extraemos contraseña y los campos que deben ser únicos
+    nombre_usuario = datos.get('nombre_usuario')
+    email = datos.get('email')
+    dni = datos.get('dni')
+    passPlana = datos.get('contraseña')
+
+    # Validación de existencia en formulario de campos obligatorios
+    # if not nombre_usuario or not passPlana or not email or not dni:
+    #     return jsonify({"ERROR": "Debe rellenar los campos obligatorios (nombre de usuario, contraseña, email, dni)"}), 400
+
+    # Comprobación de existencia en base de datos de los campos únicos anteriores
+    usuario_existente = coleccion.find_one({
+        "$or": [ # El operador $or devuelve un documento si coincide cualquiera de las condiciones 
+            {"nombre_usuario": nombre_usuario},
+            {"email": email},
+            {"dni": dni}
+        ]
+    })
+
+    # Si ya existe un usuario personalizamos el mensaje según qué campo falló
+    if usuario_existente:
+        if usuario_existente.get('email') == email:
+            mensaje = "Ese email ya está registrado"
+        elif usuario_existente.get('dni') == dni:
+            mensaje = "Ese DNI ya está registrado"
+        else:
+            mensaje = "El nombre de usuario ya está en uso"
+        
+        return jsonify({"ERROR": mensaje}), 400
+
+
+    # Usamos Bcrypt para hashear la contraseña
+    passPlana = datos.get('contraseña')
+    passHasheada = bcrypt.generate_password_hash(passPlana).decode('utf-8')
+
+    nuevoUsuario = {
+        "nombre_usuario": nombre_usuario,
+        "contraseña": passHasheada, # Se almacenará la pass hasheada y no plana
+        "nombre": datos.get('nombre'),
+        "apellidos": datos.get('apellidos'),
+        "dni": dni,
+        "telefono": datos.get('telefono'),
+        "email": email,
+        "rol": "cliente", # cliente/administrador, cliente por defecto al registrarse
+        "fecha_alta": datetime.now(),
+        "estado_suscripcion": True
+    }
+
+    idGeneradoNuevoUsuario = coleccion.insert_one(nuevoUsuario).inserted_id
+
+    return jsonify({
+        "mensaje": "Usuario registrado correctamente",
+         "id": str(idGeneradoNuevoUsuario)
+    }), 201
+
+
+## LOGIN USUARIO EN APP
+@app.route('/auth/login', methods=['POST'])
+def loginUsuario():
+    coleccion = db['usuarios']
+    datos = request.json
+
+    # VALIDACIONES
+    try:
+        # Intentamos validar los datos obtenidos del registro
+        datos = validacionLogin.validate(datos)
+    except Exception as e:
+        # Si hay un error se especificará de forma detallada
+        return jsonify({"ERROR": "Validación fallida", "detalle": str(e)}), 400
+    
+    nombre_usuario = datos.get('nombre_usuario')
+    passPlana = datos.get('contraseña')
+
+    usuario = coleccion.find_one({"nombre_usuario": nombre_usuario})
+
+    # Verificamos si el usuario existe y si la contraseña coincide
+    if usuario and bcrypt.check_password_hash(usuario['contraseña'], passPlana):
+
+        # Creamos token guardando el id del usuario y su rol
+        token = create_access_token(
+            identity = str(usuario['_id']), 
+            additional_claims = {"rol": usuario.get('rol')}
+        )
+        
+        return jsonify({
+            "token": token,
+            "usuario": {
+                "nombre_usuario": usuario.get('nombre_usuario'),
+                "rol": usuario.get('rol')
+            }
+        }), 200
+    
+    return jsonify({"ERROR": "Nombre de usuario o contraseña incorrectos"}), 401
+
+
+## USUARIO (obsoleto)
 @app.route('/usuarios', methods=['POST'])
 def crear_usuario():
     coleccion = db['usuarios']
@@ -647,7 +764,8 @@ def actualizar_usuario(id):
 
         # Si el usuario envía una nueva contraseña, debemos hashearla
         if 'password' in datosActualizados:
-            datosActualizados['password'] = generate_password_hash(datosActualizados['password'])
+            # datosActualizados['contraseña'] = generate_password_hash(datosActualizados['contraseña'])
+            datosActualizados['contraseña'] = bcrypt.generate_password_hash(datosActualizados['contraseña']).decode('utf-8')
 
         # Ejecutar la actualización en MongoDB
         # Usamos $set para modificar solo los campos enviados sin borrar el resto

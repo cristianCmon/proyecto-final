@@ -23,6 +23,28 @@ GET http://localhost:5000/asistencias
 GET http://localhost:5000/asistencias/
 
 
+### REGISTRAR USUARIO
+POST http://localhost:5000/auth/registro
+Content-Type: application/json
+
+{
+    "nombre_usuario": "pepiweon",
+    "contraseña": "abc123..",
+    "nombre": "Pepe",
+    "apellidos": "Estévez Fernández",
+    "dni": "36152233Z",
+    "email": "pepitoweon@gmail.com"
+}
+
+### LOGIN USUARIO
+POST http://localhost:5000/auth/login
+Content-Type: application/json
+
+{
+    "nombre_usuario": "roy78",
+    "contraseña": "abc123.."
+}
+
 
 ### CREAR USUARIO
 POST http://localhost:5000/usuarios
