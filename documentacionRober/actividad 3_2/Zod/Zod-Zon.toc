@@ -1,0 +1,4 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}¿Qué es Zod/Zon?}{1}{}%
+\contentsline {section}{\numberline {2}¿Por qué implementarlo?}{2}{}%
+\contentsline {section}{\numberline {3}Implementación}{3}{}%
