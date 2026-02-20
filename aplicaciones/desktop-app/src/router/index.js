@@ -1,8 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 
 // Importamos las vistas
-import Login from '../views/Login.vue';
-import Registro from '../views/Registro.vue';
+import Login from '../views/LoginUsuario.vue';
+import Registro from '../views/RegistroUsuario.vue';
 
 // Definimos rutas
 const routes = [
@@ -16,12 +16,12 @@ const routes = [
     name: 'Registro',
     component: Registro
   },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    // Carga perezosa (lazy loading) para mejorar el rendimiento
-    component: () => import('../views/Dashboard.vue') 
-  }
+  // {
+  //   path: '/dashboard',
+  //   name: 'Dashboard',
+  //   // Carga perezosa (lazy loading) para mejorar el rendimiento
+  //   component: () => import('../views/Dashboard.vue') 
+  // }
 ];
 
 // Creamos la instancia del Router

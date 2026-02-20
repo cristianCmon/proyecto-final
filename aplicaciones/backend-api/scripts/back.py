@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from validaciones import validacionRegistro, validacionLogin
-
+from flask_cors import CORS
 
 # Obtenemos la ruta absoluta de la carpeta donde está el script actual
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +18,9 @@ template_dir = os.path.join(base_dir, '..', 'templates')
 static_dir = os.path.join(base_dir, '..', 'static')
 
 app = Flask(__name__, template_folder = template_dir, static_folder = static_dir)
+
+# NECESARIO PARA EVITAR BLOQUEOS CON LOS FRONTEND
+CORS(app) 
 
 # IMPLEMENTACIÓN BCRYPT + JWT PARA ROBER
 bcrypt = Bcrypt(app)
