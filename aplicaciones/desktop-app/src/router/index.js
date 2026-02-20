@@ -3,19 +3,28 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 // Importamos las vistas
 import Login from '../views/LoginUsuario.vue';
 import Registro from '../views/RegistroUsuario.vue';
+import Layout from '../layouts/AutorizacionLayout.vue';
 
 // Definimos rutas
 const routes = [
   {
     path: '/',
-    name: 'Login',
-    component: Login
-  },
-  {
-    path: '/registro',
-    name: 'Registro',
-    component: Registro
-  },
+    component: Layout,
+    children: [
+      { path: '', name: 'Login', component: Login },
+      { path: 'registro', name: 'Registro', component: Registro }
+    ]
+  }
+  // {
+  //   path: '/',
+  //   name: 'Login',
+  //   component: Login
+  // },
+  // {
+  //   path: '/registro',
+  //   name: 'Registro',
+  //   component: Registro
+  // },
   // {
   //   path: '/dashboard',
   //   name: 'Dashboard',

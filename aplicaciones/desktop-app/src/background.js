@@ -14,8 +14,8 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width: 1366,
+    height: 768,
     resizable: false,      // DESHABILITA CAPACIDAD DE ESTIRAR VENTANA
     minimizable: true,     // PERMITE OCULTAR VENTANA
     maximizable: false,    // DESHABILITA BOTÓN MAXIMIZAR VENTANA

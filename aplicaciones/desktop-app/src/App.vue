@@ -19,6 +19,30 @@ body {
   align-items: center;
   min-height: 100vh;
 }
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #4338ca;
+}
 </style>
 
 <!-- <script>
