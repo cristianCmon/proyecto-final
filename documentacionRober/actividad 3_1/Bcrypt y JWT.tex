@@ -63,11 +63,35 @@
 \newpage
 \pagenumbering{arabic} % Empieza a contar (1, 2, 3...) desde aquí
 
+\section{Introducción}
+\noindent El objetivo de esta práctica es aplicar las librerías \textbf{Bcrypt} y \textbf{JWT} en una proyecto en construcción que tiene 
+como objetivo gestionar las actividades y reservas de un gimnasio. Dicho proyecto está configurado de la siguiente manera:\\
+\begin{itemize}
+\item \textbf{Backend API.} El backend está programado en \underline{python} usando el framework \underline{flask} y fue mi elección por 2 razones,
+la primera porque nunca había ``programado'' en python y la segunda porque flask tiene fama de ser muy agradable de programar.
+\item \textbf{Frontend Escritorio.} El frontend de escritorio está programado en \underline{Vue} y \underline{Electron} y la razón es porque las
+especificaciones lo obligaban.
+\item \textbf{Frontend Móvil.} El frontend móvil está programado en \underline{React Native}. Las opciones eran ésta o \underline{Flutter} y me decidí
+por React por estar ya familiarizado por una práctica anterior y porque es muy sencillo compilarlo en máquina real.\\
+\end{itemize} 
+\section{¿Por qué implementarlos?}
+\noindent La razón principal para implementar estas librerías en el proyecto es simple: \textbf{SEGURIDAD}.\\\\
+\textbf{Bcrypt} nos permitirá hashear las contraseñas de los usuarios en la base de datos, dando una capa extra de seguridad en comparación con la 
+encriptación. Si un ataque mal intencionado a la base de datos expusiese la información del usuario, el atacante se encontraría con una contraseña
+hasheada imposible de descrifrar.\\\\
+\textbf{JWT} nos posibilitará crear sesiones para los diferentes usuarios de la aplicación en los diferentes frontends mediante la generación de tokens.
+Dichos tokens, de duración variable, nos permitirá autenticar, autorizar e intercambiar información en los diferentes endpoints de la aplicación.\\\\
+\textit{\underline{Las librerías se implementarán en el Backend}}, y específicamente son las siguientes:
+\begin{itemize}
+    \item \textit{flask-bcrypt}
+    \item \textit{flask-jwt-extended}
+\end{itemize}
+\noindent \\Ambas se pueden encontrar en https://pypi.org/
+\newpage
+
 \section{¿Qué son Bcrypt y JWT?}
 \newpage
 
-\section{¿Por qué implementarlos?}
-\newpage
 
 \section{Implementación}
 \newpage

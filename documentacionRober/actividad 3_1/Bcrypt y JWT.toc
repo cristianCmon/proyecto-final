@@ -1,4 +1,5 @@
 \babel@toc {spanish}{}\relax 
-\contentsline {section}{\numberline {1}¿Qué son Bcrypt y JWT?}{1}{}%
-\contentsline {section}{\numberline {2}¿Por qué implementarlos?}{2}{}%
-\contentsline {section}{\numberline {3}Implementación}{3}{}%
+\contentsline {section}{\numberline {1}Introducción}{1}{}%
+\contentsline {section}{\numberline {2}¿Por qué implementarlos?}{1}{}%
+\contentsline {section}{\numberline {3}¿Qué son Bcrypt y JWT?}{2}{}%
+\contentsline {section}{\numberline {4}Implementación}{3}{}%
