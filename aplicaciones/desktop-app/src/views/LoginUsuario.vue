@@ -46,8 +46,7 @@ export default {
         // localStorage.setItem('user-token', data.token);
         // const usuario = {tokenUsuario: data.token, nombre: data.nombre_usuario, rol: data.rol}
         // sessionStorage.setItem(usuario);
-
-        this.$router.push('/dashboard');
+        
       } catch (err) {
         // 'err' aquí es el JSON de error que envía tu Flask (p.ej. {"ERROR": "..."})
         this.error = err.ERROR || "Error en el servidor";

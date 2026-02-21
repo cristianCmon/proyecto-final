@@ -17,22 +17,6 @@ const routes = [
       { path: 'dashboard', name: 'Dashboard', component: Dashboard }
     ]
   }
-  // {
-  //   path: '/',
-  //   name: 'Login',
-  //   component: Login
-  // },
-  // {
-  //   path: '/registro',
-  //   name: 'Registro',
-  //   component: Registro
-  // },
-  // {
-  //   path: '/dashboard',
-  //   name: 'Dashboard',
-  //   // Carga perezosa (lazy loading) para mejorar el rendimiento
-  //   component: () => import('../views/Dashboard.vue') 
-  // }
 ];
 
 // Creamos la instancia del Router
