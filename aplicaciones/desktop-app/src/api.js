@@ -10,7 +10,8 @@ export const apiFetch = async (endpoint, options = {}) => {
   };
 
   // Si tenemos un token guardado, lo añadimos automáticamente
-  const token = localStorage.getItem('user-token');
+  const token = sessionStorage.getItem('tokenUsuario');
+  
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
