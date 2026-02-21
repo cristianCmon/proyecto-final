@@ -168,3 +168,207 @@
 .admin-btns { display: flex; gap: 5px; margin-top: 15px; }
 .btn-edit { background-color: #f59e0b; }
 .btn-delete { background-color: #ef4444; }
+
+
+/* Estilo para el item activo en el sidebar */
+.menu-item.active {
+  background-color: #4f46e5;
+  color: white !important;
+}
+
+/* Tabla de Sesiones */
+.sesiones-table-container {
+  margin-top: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sesiones-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sesiones-table th {
+  background-color: #f8fafc;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 15px;
+  text-align: left;
+}
+
+.sesiones-table td {
+  padding: 15px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Pills de estado */
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.status-pill.programada { background: #dcfce7; color: #166534; }
+.status-pill.cancelada { background: #fee2e2; color: #991b1b; }
+
+/* Botones de acción dentro de la tabla */
+.btn-reserve-small {
+  background-color: #4f46e5;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  width: auto;
+}
+
+.btn-delete-small {
+  background-color: #ffffff;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  width: auto;
+}
+
+.horarios-section {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.horario-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.horario-item select, .horario-item input {
+  padding: 5px;
+  margin-bottom: 0; /* Sobrescribe el global si es necesario */
+}
+
+.btn-add-h {
+  background: #6366f1;
+  font-size: 0.8rem;
+  width: auto;
+  padding: 5px 10px;
+}
+
+.btn-remove-h {
+  background: #ef4444;
+  color: white;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+
+/* --- ESTILOS DEL MODAL --- */
+
+/* La capa oscura que cubre toda la pantalla */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.7); /* Fondo oscuro semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Por encima de todo */
+  backdrop-filter: blur(4px); /* Efecto de desenfoque al fondo */
+}
+
+/* La tarjeta blanca del formulario */
+.modal-card {
+  background: white;
+  width: 500px;
+  max-width: 90%;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* Estilos del Formulario dentro del modal */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.form-group input, .form-group textarea, .horario-item select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-save {
+  background: #4f46e5;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}

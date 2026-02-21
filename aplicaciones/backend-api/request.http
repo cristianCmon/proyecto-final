@@ -66,25 +66,40 @@ POST http://localhost:5000/actividades
 Content-Type: application/json
 
 {
-    "nombre": "Boxeo",
-    "descripcion": "Instrucción básica en el noble arte pugilístico",
-    "capacidad_maxima": 20,
-    "horario": [
-        {
-            "dia": "Lunes",
-            "hora_inicio": "10:00",
-            "hora_fin": "11:30"
-        },
-        {
-            "dia": "Miércoles",
-            "hora_inicio": "10:00",
-            "hora_fin": "11:30"
-        }
-    ]
+  "nombre": "Pilates",
+  "descripcion": "Fundamental para fortalecer el abdomen y cuidar la espalda.",
+  "capacidad_maxima": 18,
+  "horario": [
+    {
+      "dia": "Lunes",
+      "hora_inicio": "12:00",
+      "hora_fin": "13:00"
+    },
+    {
+      "dia": "Martes",
+      "hora_inicio": "10:00",
+      "hora_fin": "11:00"
+    },
+    {
+      "dia": "Miércoles",
+      "hora_inicio": "12:00",
+      "hora_fin": "13:00"
+    },
+    {
+      "dia": "Jueves",
+      "hora_inicio": "10:00",
+      "hora_fin": "11:00"
+    },
+    {
+      "dia": "Viernes",
+      "hora_inicio": "12:00",
+      "hora_fin": "13:00"
+    }
+  ]
 }
 
 ### CREAR SESION
-POST http://localhost:5000/actividades/698b5debf1153ae71ea0c839/sesiones
+POST http://localhost:5000/actividades/6999fd682e6c962fbb2078df/sesiones
 Content-Type: application/json
 
 ### CREAR RESERVA
