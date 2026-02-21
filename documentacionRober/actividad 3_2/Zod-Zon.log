@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.15)  20 FEB 2026 10:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.15)  21 FEB 2026 01:35
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**"c:/Users/Abueloncho/Documents/proyectos/code/proyecto-final/documentacionRober/actividad 3_2/Zod/Zod-Zon.tex"
-(c:/Users/Abueloncho/Documents/proyectos/code/proyecto-final/documentacionRober/actividad 3_2/Zod/Zod-Zon.tex
+**"c:/Users/Abueloncho/Documents/proyectos/code/proyecto-final/documentacionRober/actividad 3_2/Zod-Zon.tex"
+(c:/Users/Abueloncho/Documents/proyectos/code/proyecto-final/documentacionRober/actividad 3_2/Zod-Zon.tex
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-09-02>
 (C:\Users\Abueloncho\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
@@ -368,6 +368,16 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 
 [1]
+Underfull \hbox (badness 10000) in paragraph at lines 67--69
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 75--77
+
+ []
+
+
 
 [1]
 
@@ -383,15 +393,15 @@ L3 programming layer <2025-09-02>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 7042 strings out of 468130
- 122884 string characters out of 5428212
- 559306 words of memory out of 5000000
- 35570 multiletter control sequences out of 15000+600000
+ 7045 strings out of 468130
+ 122915 string characters out of 5428212
+ 562306 words of memory out of 5000000
+ 35573 multiletter control sequences out of 15000+600000
  665586 words of font info for 71 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,6n,107p,403b,377s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,6n,107p,399b,377s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/Abueloncho/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/Abueloncho/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on Zod-Zon.pdf (5 pages, 22103 bytes).
+Output written on Zod-Zon.pdf (5 pages, 27310 bytes).
 PDF statistics:
  29 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
