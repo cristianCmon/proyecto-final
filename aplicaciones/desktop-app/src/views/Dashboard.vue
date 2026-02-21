@@ -123,7 +123,7 @@
     <div v-if="mostrarModalActividad" class="modal-overlay">
       <div class="modal-card">
         <header class="modal-header">
-          <h3>Configurar Nueva Actividad</h3>
+          <h3>Configuración Nueva Actividad</h3>
           </header>
 
         <form @submit.prevent="guardarActividad" class="modal-form">
@@ -139,26 +139,32 @@
 
           <div class="form-group">
             <label>Capacidad Máxima</label>
-            <input v-model.number="nuevaActividad.capacidad_maxima" type="number" required>
+            <input v-model.number="nuevaActividad.capacidad_maxima" type="number" min="1" step="1" required>
           </div>
 
           <div class="horarios-section">
             <h4>Horarios Semanales (Plantilla)</h4>
             <div v-for="(h, index) in nuevaActividad.horario" :key="index" class="horario-item">
+              
               <select v-model="h.dia">
-                <option v-for="d in dias" :key="d" :value="d">{{ d }}</option>
+                <option :value="h.dia">{{ h.dia }}</option>
+                <option v-for="d in diasDisponibles" :key="d" :value="d">{{ d }}</option>
               </select>
+
               <input type="time" v-model="h.hora_inicio" required>
               <span>a</span>
               <input type="time" v-model="h.hora_fin" required>
               <button type="button" @click="quitarHorario(index)" class="btn-remove-h">×</button>
             </div>
-            <button type="button" @click="agregarHorario" class="btn-add-h">+ Añadir Horario</button>
+
+            <button v-if="aceptaMasHorarios" type="button" @click="incluirHorario" class="btn-add-h">
+              + Añadir Horario
+            </button>
           </div>
 
           <div class="modal-actions">
             <button type="button" @click="mostrarModalActividad = false" class="btn-cancel">Cancelar</button>
-            <button type="submit" class="btn-save">Crear Plantilla</button>
+            <button type="submit" class="btn-save">Crear Actividad</button>
           </div>
         </form>
       </div>
@@ -186,7 +192,7 @@ export default {
       nuevaActividad: {
         nombre: '',
         descripcion: '',
-        capacidad_maxima: 20,
+        capacidad_maxima: 10,
         horario: [] // Lista de objetos { dia, hora_inicio, hora_fin }
       }
     }
@@ -195,15 +201,28 @@ export default {
   computed: {
     tituloPestana() {
       return this.pestanaActiva === 'actividades' ? 'Catálogo de Actividades' : 'Calendario de Sesiones';
+    },
+
+    // FILTRA DÍAS DISPONIBLES EN FORMULARIO ACTIVIDAD
+    diasDisponibles() {
+      // Obtenemos los días que ya están en el array de horarios
+      const diasSeleccionados = this.nuevaActividad.horario.map(h => h.dia);
+      // Retornamos solo los que no están en esa lista
+      return this.dias.filter(d => !diasSeleccionados.includes(d));
+    },
+
+    // DÍAS MÁXIMOS PARA UNA ACTIVIDAD
+    aceptaMasHorarios() {
+      return this.nuevaActividad.horario.length < 7;
     }
   },
 
   async mounted() {
-    await this.cargarTodo();
+    await this.refrescarDashboard();
   },
 
   methods: {
-    async cargarTodo() {
+    async refrescarDashboard() {
       this.cargando = true;
 
       try {
@@ -229,7 +248,7 @@ export default {
       try {
         const res = await apiFetch(`/actividades/${id}/sesiones`, { method: 'POST' });
         alert(res.mensaje);
-        await this.cargarTodo();
+        await this.refrescarDashboard();
         this.pestanaActiva = 'sesiones'; // Lleva automáticamente a ver las sesiones creadas
 
       } catch (err) {
@@ -247,12 +266,17 @@ export default {
       this.$router.push('/');
     },
 
-    agregarHorario() {
-      this.nuevaActividad.horario.push({
-        dia: 'Lunes',
-        hora_inicio: '09:00',
-        hora_fin: '10:00'
-      });
+    incluirHorario() {
+      if (this.aceptaMasHorarios) {
+        this.nuevaActividad.horario.push({
+          dia: this.diasDisponibles[0],
+          hora_inicio: '09:00',
+          hora_fin: '10:00'
+        });
+
+      } else {
+        alert("Ya has programado todos los días de la semana.");
+      }
     },
 
     quitarHorario(index) {
@@ -260,6 +284,12 @@ export default {
     },
 
     async guardarActividad() {
+      // VALIDACIÓN CAPACIDAD MÍNIMA
+      if (this.nuevaActividad.capacidad_maxima < 1) {
+        alert("La capacidad debe ser al menos de 1 persona.");
+        return;
+      }
+      // VALIDACIÓN FECHA MÍNIMA
       if (this.nuevaActividad.horario.length === 0) {
         alert("Debes añadir al menos un horario para la plantilla.");
         return;
@@ -277,7 +307,7 @@ export default {
         // Reset del formulario
         this.nuevaActividad = { nombre: '', descripcion: '', aula: '', capacidad_maxima: 20, horario: [] };
         
-        await this.cargarTodo();
+        await this.refrescarDashboard();
 
       } catch (err) {
         alert("Error: " + (err.ERROR || "No se pudo guardar"));
@@ -294,11 +324,27 @@ export default {
           });
 
           alert("Actividad eliminada con éxito.");
-          await this.cargarTodo(); 
+          await this.refrescarDashboard(); 
 
         } catch (err) {
           console.error("Error al eliminar:", err);
           alert("No se pudo eliminar la actividad: " + (err.ERROR || "Error del servidor"));
+        }
+      }
+    },
+
+    async cancelarSesion(idSesion) {
+      if (confirm("¿Seguro que quieres anular esta sesión?")) {
+        try {
+          await apiFetch(`/sesiones/${idSesion}`, {
+            method: 'DELETE'
+          });
+
+          alert("Sesión anulada.");
+          await this.refrescarDashboard();
+
+        } catch (err) {
+          alert("Error al anular la sesión.");
         }
       }
     }
