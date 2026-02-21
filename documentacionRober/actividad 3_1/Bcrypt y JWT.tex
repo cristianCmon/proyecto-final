@@ -64,23 +64,24 @@
 \pagenumbering{arabic} % Empieza a contar (1, 2, 3...) desde aquí
 
 \section{Introducción}
-\noindent El objetivo de esta práctica es aplicar las librerías \textbf{Bcrypt} y \textbf{JWT} en una proyecto en construcción que tiene 
+\noindent \\El objetivo de esta práctica es aplicar las librerías \textbf{Bcrypt} y \textbf{JWT} en una proyecto en construcción que tiene 
 como objetivo gestionar las actividades y reservas de un gimnasio. Dicho proyecto está configurado de la siguiente manera:\\
 \begin{itemize}
-\item \textbf{Backend API.} El backend está programado en \underline{python} usando el framework \underline{flask} y fue mi elección por 2 razones,
-la primera porque nunca había ``programado'' en python y la segunda porque flask tiene fama de ser muy agradable de programar.
+\item \textbf{Backend API.} El backend está programado en \underline{python} usando el framework \underline{flask} con base de datos en \underline{MongoDB}.
+Fue mi elección por 2 razones, la primera porque nunca había ``programado'' en python y la segunda porque flask tiene fama de ser muy agradable
+de programar.
 \item \textbf{Frontend Escritorio.} El frontend de escritorio está programado en \underline{Vue} y \underline{Electron} y la razón es porque las
 especificaciones lo obligaban.
 \item \textbf{Frontend Móvil.} El frontend móvil está programado en \underline{React Native}. Las opciones eran ésta o \underline{Flutter} y me decidí
 por React por estar ya familiarizado por una práctica anterior y porque es muy sencillo compilarlo en máquina real.\\
 \end{itemize} 
 \section{¿Por qué implementarlos?}
-\noindent La razón principal para implementar estas librerías en el proyecto es simple: \textbf{SEGURIDAD}.\\\\
+\noindent \\La razón principal para implementar estas librerías en el proyecto es simple: \textbf{SEGURIDAD}.\\\\
 \textbf{Bcrypt} nos permitirá hashear las contraseñas de los usuarios en la base de datos, dando una capa extra de seguridad en comparación con la 
 encriptación. Si un ataque mal intencionado a la base de datos expusiese la información del usuario, el atacante se encontraría con una contraseña
 hasheada imposible de descrifrar.\\\\
 \textbf{JWT} nos posibilitará crear sesiones para los diferentes usuarios de la aplicación en los diferentes frontends mediante la generación de tokens.
-Dichos tokens, de duración variable, nos permitirá autenticar, autorizar e intercambiar información en los diferentes endpoints de la aplicación.\\\\
+Dichos tokens, de duración variable, nos permitirán autenticar, autorizar e intercambiar información en los diferentes endpoints de la aplicación.\\\\
 \textit{\underline{Las librerías se implementarán en el Backend}}, y específicamente son las siguientes:
 \begin{itemize}
     \item \textit{flask-bcrypt}
@@ -90,10 +91,79 @@ Dichos tokens, de duración variable, nos permitirá autenticar, autorizar e int
 \newpage
 
 \section{¿Qué son Bcrypt y JWT?}
+\noindent \\\textbf{Bcrypt} es una función de hashing (derivación de claves) diseñada para proteger contraseñas, basada en el cifrado de bloque Blowfish. A diferencia
+de algoritmos rápidos como SHA256, bcrypt es intencionalmente lento, lo que lo hace altamente resistente a ataques de fuerza bruta y precomputados.\\\\
+Características principales:\\
+\begin{itemize}
+    \item \textbf{Hash, no encriptación.} Bcrypt transforma una contraseña en una cadena de caracteres ininteligible (un hash) de una sola vía. No se puede "desencriptar"
+    para obtener la contraseña original, solo verificarla. 
+    \item \textbf{Salting (Sal).} Bcrypt genera automáticamente una "sal" (una cadena aleatoria) para cada contraseña antes de hashearla. Esto asegura que, si dos usuarios
+    usan la misma contraseña ("123456"), sus hashes almacenados sean completamente diferentes, protegiendo contra ataques de fuerza bruta.
+\end{itemize}
+\noindent \\\\\\\textbf{JWT (JSON Web Token)} es un estándar abierto que define una forma compacta y autónoma para transmitir información segura entre partes
+como un objeto JSON. Es ampliamente utilizado para la autenticación y autorización en aplicaciones web, permitiendo validar la identidad del usuario sin necesidad de
+almacenar sesiones en el servidor.\\\\
+Características principales:\\
+\begin{itemize}
+    \item \textbf{Autónomo (Stateless).} El token contiene toda la información necesaria sobre el usuario, eliminando la necesidad de consultar la
+    base de datos en cada petición.
+    \item \textbf{Firmado digitalmente.} Los JWT se firman (usando secretos o pares de claves pública/privada) para garantizar la integridad y autenticidad de los datos.
+\end{itemize}
 \newpage
 
-
 \section{Implementación}
+\noindent \\Lo primero que debemos hacer es importar las librerías correspondientes en nuestra API.
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_1.png}
+    \caption{CORS será necesaria para que haya comunicación con los frontend}
+\end{figure}
+\noindent \\\\\\Empecemos por mostrar el endpoint de registro.
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_2.png}
+    \caption{Parte 1 - Parece que ha habido cambios en el sistema de validación...}
+\end{figure}
+\newpage
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_3.png}
+    \caption{Parte 2}
+\end{figure}
+\noindent \\\\En la línea 94 podemos observar cómo asignamos a una variable la contraseña obtenida en la cabecera de la petición a la hora
+de hacer un registro. Posteriormente, en la línea 95, aplicamos el hasheo a la constraseña y la almacenamos en una nueva variable que, posteriormente
+en la línea 99, la incluiremos como parte del objeto \textit{`nuevoUsuario'} que almacenaremos en la base de datos en la línea 110.
+\newpage
+\noindent El trabajo en el endpoint de registro ya está hecho, pasemos ahora al endpoint de login.
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_4.png}
+\end{figure}
+\noindent \\\\En la línea 138 podemos comprobar que, si existe en la base de datos el nombre de usuario introducido y, si la contraseña hasheada
+almacenada de ese usuario se compara con la \textit{``contraseña plana''} obtenida del login y devuelve verdadero el login será satisfactorio y 
+crearemos un token. De lo contrario devolverá un error 401.\\\\
+Los métodos clave son \textit{check\_password\_hash} y \textit{create\_access\_token} de las librerías bcrypt y jwt respectivamente.
+\newpage
+\noindent Vamos a logearnos en la aplicación con un usuario ya creado en MongoDB.
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Screenshot_5.png}
+    \caption{Como se puede apreciar, la contraseña está perfectamente hasheada}
+\end{figure}
+\noindent \\\\Veamos el login del frontend de escritorio.
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_6.png}
+    \caption{Vista en desarrollo}
+\end{figure}
+\newpage
+\noindent Si el logeo es satisfactorio, entraremos en la aplicación.
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_7.png}
+    \caption{Vista en desarrollo}
+\end{figure}
+\noindent \\\\Como se puede apreciar, en el Session Storage queda almacenado el token del usuario, su nombre y su rol.
 \newpage
 
 \end{document}

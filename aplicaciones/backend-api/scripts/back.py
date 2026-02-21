@@ -8,8 +8,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from validaciones import validacionRegistro, validacionLogin
 from flask_cors import CORS
+from validaciones import validacionRegistro, validacionLogin
 
 # Obtenemos la ruta absoluta de la carpeta donde está el script actual
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -89,7 +89,6 @@ def registroUsuario():
             mensaje = "El nombre de usuario ya está en uso"
         
         return jsonify({"ERROR": mensaje}), 400
-
 
     # Usamos Bcrypt para hashear la contraseña
     passPlana = datos.get('contraseña')
