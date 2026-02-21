@@ -107,8 +107,8 @@ POST http://localhost:5000/reservas
 Content-Type: application/json
 
 {
-    "id_usuario": "698a0fe523c03b02b2a706bb",
-    "id_sesion": "698de7c1b2cca1f5f61130cf"
+    "id_usuario": "69990fd94a0f8b020673074f",
+    "id_sesion": "699a41e04f4f43ffd5cfbb32"
 }
 
 ### CREAR ASISTENCIA

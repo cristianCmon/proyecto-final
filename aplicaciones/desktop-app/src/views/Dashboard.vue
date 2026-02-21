@@ -37,7 +37,8 @@
           <div class="content-card">
             <div class="header-section">
               <h3>Oferta de Actividades</h3>
-              <button v-if="usuario.rol === 'administrador'" @click="mostrarModalActividad = true" class="btn-add">+ Nueva Actividad</button>
+              <!-- FORZAMOS VARIABLE editando A FALSE -->
+              <button v-if="usuario.rol === 'administrador'" @click="editando = false; mostrarModalActividad = true" class="btn-add">+ Nueva Actividad</button>
             </div>
 
             <div v-if="cargando" class="loader">Cargando catálogo...</div>
@@ -47,18 +48,18 @@
                 <div class="act-info">
                   <h4>{{ act.nombre }}</h4>
                   <p class="descripcion">{{ act.descripcion }}</p>
-                  <div class="meta">
+                  <!-- <div class="meta">
                     <span>📍 {{ act.aula }}</span>
                     <span>👥 {{ act.capacidad_maxima }} plazas</span>
-                  </div>
+                  </div> -->
                 </div>
                 
                 <div v-if="usuario.rol === 'administrador'" class="act-actions">
                   <button @click="generarSesiones(act.id)" class="btn-generate">
-                    🗓️ Generar Sesiones (15 días)
+                    🗓️ Generar Sesiones (7 días)
                   </button>
                   <div class="admin-btns-row">
-                    <button class="btn-edit">✏️</button>
+                    <button @click="modificarActividad(act)" class="btn-edit">✏️</button>
                     <button @click="eliminarActividad(act.id)" class="btn-delete">🗑️</button>
                   </div>
                 </div>
@@ -123,7 +124,7 @@
     <div v-if="mostrarModalActividad" class="modal-overlay">
       <div class="modal-card">
         <header class="modal-header">
-          <h3>Configuración Nueva Actividad</h3>
+          <h3>{{ editando ? 'Modificar Actividad' : 'Configuración Nueva Actividad' }}</h3>
           </header>
 
         <form @submit.prevent="guardarActividad" class="modal-form">
@@ -163,12 +164,13 @@
           </div>
 
           <div class="modal-actions">
-            <button type="button" @click="mostrarModalActividad = false" class="btn-cancel">Cancelar</button>
-            <button type="submit" class="btn-save">Crear Actividad</button>
+            <button type="button" @click="cerrarLimpiarModal" class="btn-cancel">Cancelar</button>
+            <button type="submit" class="btn-save">{{ editando ? 'Actualizar Cambios' : 'Crear Actividad' }}</button>
           </div>
         </form>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -194,7 +196,10 @@ export default {
         descripcion: '',
         capacidad_maxima: 10,
         horario: [] // Lista de objetos { dia, hora_inicio, hora_fin }
-      }
+      },
+
+      editando: false,
+      idActividadEditable: null,
     }
   },
 
@@ -296,21 +301,25 @@ export default {
       }
 
       try {
-        await apiFetch('/actividades', {
-          method: 'POST',
+        let url = '/actividades';
+        let metodo = 'POST';
+
+        if (this.editando) {
+          url = `/actividades/${this.idActividadEditable}`;
+          metodo = 'PUT';
+        }
+
+        await apiFetch(url, {
+          method: metodo,
           body: JSON.stringify(this.nuevaActividad)
         });
-        
-        alert("Plantilla creada correctamente");
-        this.mostrarModalActividad = false;
-        
-        // Reset del formulario
-        this.nuevaActividad = { nombre: '', descripcion: '', aula: '', capacidad_maxima: 20, horario: [] };
-        
+
+        alert(this.editando ? "Actividad modificada" : "Actividad creada");
+        this.cerrarLimpiarModal();
         await this.refrescarDashboard();
 
       } catch (err) {
-        alert("Error: " + (err.ERROR || "No se pudo guardar"));
+        alert("Error al guardar: " + (err.ERROR || "Error desconocido"));
       }
     },
 
@@ -347,6 +356,24 @@ export default {
           alert("Error al anular la sesión.");
         }
       }
+    },
+
+    modificarActividad(actividad) {
+      this.editando = true;
+      this.idActividadEditable = actividad.id;
+      
+      // Clonamos los datos para no modificar la lista original por error
+      this.nuevaActividad = JSON.parse(JSON.stringify(actividad));
+      
+      this.mostrarModalActividad = true;
+    },
+
+    // Ajustamos el botón de cerrar o cancelar para resetear el estado
+    cerrarLimpiarModal() {
+      this.mostrarModalActividad = false;
+      this.editando = false;
+      this.idActividadEditable = null;
+      this.nuevaActividad = { nombre: '', descripcion: '', capacidad_maxima: 10, horario: [] };
     }
   }
 }

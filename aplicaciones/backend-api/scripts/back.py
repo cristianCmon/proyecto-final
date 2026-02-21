@@ -283,8 +283,8 @@ def crear_sesion(id):
     hoy = datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
     sesionesCreadas = 0
 
-    # Generamos sesiones para los próximos 15 días
-    for i in range(15):
+    # Generamos sesiones para los próximos 7 días
+    for i in range(7):
         fecha_analizada = hoy + timedelta(days = i)
         dia_semana_str = list(diasSemana.keys())[list(diasSemana.values()).index(fecha_analizada.weekday())]
 
