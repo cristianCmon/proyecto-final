@@ -50,7 +50,7 @@
 
 \title{\LARGE \textbf{Validaciones Zod/Zon} \\[2ex] \Large Afondamento nas Competencias Profesionais}
 \author{\\[20ex]Cristian Fernández}
-\date{Viernes, 20 de febrero de 2026}
+\date{Sábado, 21 de febrero de 2026}
 % \date{\today}
 
 \begin{document}
@@ -64,7 +64,7 @@
 \pagenumbering{arabic} % Empieza a contar (1, 2, 3...) desde aquí
 
 \section{Introducción}
-\noindent \\El objetivo de esta práctica es aplicar la librería \textbf{Zod} en un proyecto en construcción que tiene 
+\noindent \\El objetivo de esta práctica es aplicar la librería \textbf{Zon} en un proyecto en construcción que tiene 
 como objetivo gestionar las actividades y reservas de un gimnasio. Dicho proyecto está configurado de la siguiente manera:\\
 \begin{itemize}
 \item \textbf{Backend API.} El backend está programado en \underline{python} usando el framework \underline{flask} con base de datos en \underline{MongoDB}.
@@ -76,13 +76,67 @@ especificaciones lo obligaban.
 por React por estar ya familiarizado por una práctica anterior y porque es muy sencillo compilarlo en máquina real.\\
 \end{itemize} 
 \section{¿Por qué implementarlo?}
-
+\noindent \\La razón principal para implementar esta librería es sencilla: \textbf{SIMPLIFICACIÓN}.\\\\
+\textbf{Zon} nos permitirá definir esquemas declarativos y legibles y validar datos en runtime. Esto nos proporcionará ventajas tales como
+un código menos repetitivo y más simple, tener las reglas centralizadas en un solo esquema, mensajes de error más consistentes, etc.\\\\
+\textit{\underline{La librería se implementará en el Backend}}, y específicamente es la siguiente:
+\begin{itemize}
+    \item \textit{zon (pip install zon)}
+\end{itemize}
+\noindent \\Se puede encontrar en https://pypi.org/
 \newpage
 
 \section{¿Qué es Zod/Zon?}
+\noindent \\\textbf{Zod/Zon} es una biblioteca de validación de esquemas, diseñada para garantizar la integridad y el tipo de los datos en tiempo de ejecución
+de forma sencilla y expresiva. Permite definir estructuras de datos (strings, números, objetos, arrays) una única vez.\\\\
+Características principales:\\
+\begin{itemize}
+    \item \textbf{Seguridad de tipos.} Ofrece una inferencia de tipos automática y precisa, asegurando que los datos cumplan con las reglas definidas.
+    \item \textbf{Validación en tiempo de ejecución.} Verifica que los datos recibidos (por ejemplo, desde una API o un formulario) cumplan con el esquema.
+    \item \textbf{Sintaxis declarativa.} Se definen los datos mediante esquemas, por ejemplo, z.string().email(), lo que facilita la lectura y el mantenimiento.
+    \item \textbf{Mensajes de error personalizables.} Permite generar errores claros y personalizados si los datos no coinciden con el esquema.
+\end{itemize}
 \newpage
 
 \section{Implementación}
+\noindent \\Crearemos un nuevo archivo en nuestro backend en el que alojar los esquemas de validación para el registro de usuarios y el login.\\\\
+Así quedaría el código.\\
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Screenshot_1.png}
+    \caption{Archivo \textit{validaciones.py}, los esquemas son muy legibles}
+\end{figure}
+\noindent \\\\\\Debemos importar los esquemas en nuestra API.\\
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Screenshot_2.png}
+\end{figure}
+\newpage
+\noindent \\Echemos un vistazo al comienzo del endpoint de registro.\\
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_3.png}
+\end{figure}
+\noindent \\\\Ahora observemos el comienzo del endpoint de login.\\
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1\textwidth]{Screenshot_4.png}
+\end{figure}
+\noindent \\\\En el comienzo de ambos endpoints se puede observar algo muy interesante y es la tremenda simplificación de código, ya que todo la parte de validación
+se reduce a 4 líneas.
+\newpage
+\noindent \\Veamos en la siguiente página el proceso de registrar un nuevo usuario dentro del frontend de escritorio.\\
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Screenshot_5.png}
+    \caption{Vista en desarrollo}
+\end{figure}
+\noindent \\\\Comprobamos el nuevo registro en la base de datos\\
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Screenshot_6.png}
+\end{figure}
+\noindent \\\\Como se puede apreciar, la validación del formulario ha sido satisfactoria.
 \newpage
 
 \end{document}

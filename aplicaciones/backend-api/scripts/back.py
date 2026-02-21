@@ -123,7 +123,7 @@ def loginUsuario():
 
     # VALIDACIONES
     try:
-        # Intentamos validar los datos obtenidos del registro
+        # Intentamos validar los datos obtenidos del login
         datos = validacionLogin.validate(datos)
     except Exception as e:
         # Si hay un error se especificará de forma detallada

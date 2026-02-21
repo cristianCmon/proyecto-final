@@ -16,3 +16,4 @@ validacionLogin = zon.record({
     "nombre_usuario": zon.string().min(4).max(10),
     "contraseña": zon.string().min(8)
 })
+
