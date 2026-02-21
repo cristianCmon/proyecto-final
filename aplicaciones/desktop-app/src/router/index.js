@@ -42,4 +42,20 @@ const router = createRouter({
   routes
 });
 
+// COMPROBACIÓN DE SEGURIDAD, FRENA A USUARIOS SIN CREDENCIALES
+router.beforeEach((to, from, next) => {
+  const vistasPublicas = ['Login', 'Registro'];
+  const requiereAutorizacion = !vistasPublicas.includes(to.name);
+  const estaLogueado = sessionStorage.getItem('tokenUsuario');
+
+  if (requiereAutorizacion && !estaLogueado) {
+    // SI EL USUARIO INTENTA ACCEDER A UNA VISTA QUE REQUIERE CREDENCIALES, VUELVE AL LOGIN
+    next({ name: 'Login' });
+
+  } else {
+    // SINO SIGUE ADELANTE CON NORMALIDAD
+    next();
+  }
+});
+
 export default router;

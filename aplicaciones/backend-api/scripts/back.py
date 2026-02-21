@@ -193,7 +193,8 @@ def crear_usuario():
 
     # Si pasamos validaciones procedemos normalmente
     # Generamos el hash
-    passHasheada = generate_password_hash(passPlana)
+    # passHasheada = generate_password_hash(passPlana)
+    passHasheada = bcrypt.generate_password_hash(passPlana).decode('utf-8')
 
     # Creamos nuevo usuario
     nuevoUsuario = {

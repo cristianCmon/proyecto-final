@@ -51,14 +51,14 @@ POST http://localhost:5000/usuarios
 Content-Type: application/json
 
 {
-    "nombre_usuario": "pedro78",
+    "nombre_usuario": "admin",
     "contraseña": "abc123..",
-    "nombre": "Pedro",
-    "apellidos": "Escudero García",
-    "dni": "36152233B",
-    "telefono": "667132457",
-    "email": "pedro78@hotmail.com",
-    "rol": "cliente"
+    "nombre": "Administrador",
+    "apellidos": "del Sistema Actual",
+    "dni": "11111111A",
+    "telefono": "666666666",
+    "email": "admin@hotmail.com",
+    "rol": "administrador"
 }
 
 ### CREAR ACTIVIDAD

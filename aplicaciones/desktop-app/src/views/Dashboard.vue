@@ -9,7 +9,7 @@
         <a href="#">Actividades</a>
         <a href="#">Mis Reservas</a>
       </nav>
-      <button @click="handleLogout" class="btn-logout">Cerrar Sesión</button>
+      <button @click="cerrarSesion" class="btn-logout">Cerrar Sesión</button>
     </aside>
 
     <main class="content">
@@ -46,8 +46,8 @@ export default {
     }
   },
   methods: {
-    handleLogout() {
-      // Limpiamos el almacenamiento y volvemos al login
+    cerrarSesion() {
+      // Limpiamos info guardada en almacenamiento y volvemos al login
       sessionStorage.clear();
       this.$router.push({name: 'Login'});
     }
