@@ -8,15 +8,17 @@ import Dashboard from '../views/Dashboard.vue';
 
 // Definimos rutas
 const routes = [
+  // VISTAS DE ACCESO
   {
     path: '/',
     component: Layout,
     children: [
       { path: '', name: 'Login', component: Login },
       { path: 'registro', name: 'Registro', component: Registro },
-      { path: 'dashboard', name: 'Dashboard', component: Dashboard }
     ]
-  }
+  },
+  // VISTA INTERNA
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard }
 ];
 
 // Creamos la instancia del Router

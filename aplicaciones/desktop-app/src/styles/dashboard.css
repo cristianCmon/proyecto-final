@@ -86,9 +86,13 @@
 
 /* Área con scroll para que el contenido no se pierda */
 .scrollable-area {
-  padding: 40px;
+  /* padding: 40px;
   overflow-y: auto;
-  flex-grow: 1;
+  flex-grow: 1; */
+  flex-grow: 1;      /* Ocupa el espacio sobrante */
+  overflow-y: auto;  /* Permite el scroll vertical si el contenido excede el alto */
+  padding: 40px;     /* Espaciado interno */
+  height: 0;
 }
 
 .stats-grid {
