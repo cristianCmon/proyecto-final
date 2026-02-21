@@ -58,9 +58,41 @@
           </div>
         </div>
 
-        <div class="content-card mt-20">
+        <!-- <div class="content-card mt-20">
           <h3>Próximas Actividades</h3>
           <p>Cargando actividades del gimnasio...</p>
+        </div> -->
+        <div class="content-card mt-20">
+          <div class="header-section">
+            <h3>Actividades disponibles</h3>
+            <button v-if="usuario.rol === 'administrador'" class="btn-add">
+              + Nueva Actividad
+            </button>
+          </div>
+
+          <div v-if="cargando" class="loader">Cargando...</div>
+
+          <div v-else class="actividades-grid">
+            <div v-for="act in actividades" :key="act._id" class="act-card">
+              <div class="act-info">
+                <h4>{{ act.nombre }}</h4>
+                <p class="descripcion">{{ act.descripcion }}</p>
+                <div class="meta">
+                  <span>📍 {{ act.aula }}</span>
+                  <span>👥 {{ act.capacidad_maxima }} plazas</span>
+                </div>
+              </div>
+              
+              <div class="act-actions">
+                <button v-if="usuario.rol === 'cliente'" class="btn-reserve">Reservar</button>
+                
+                <div v-if="usuario.rol === 'administrador'" class="admin-btns">
+                  <button class="btn-edit">✏️</button>
+                  <button class="btn-delete">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
