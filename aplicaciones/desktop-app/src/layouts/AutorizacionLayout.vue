@@ -12,8 +12,9 @@
   </div>
 </template>
 
-<style scoped>
-.auth-wrapper {
+<style>
+  @import "../styles/autorizacion.css";
+/* .auth-wrapper {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   width: 100vw;
   height: 100vh;
@@ -41,5 +42,5 @@ h1 {
   font-size: 1.5rem;
   color: #333;
   margin: 0;
-}
+} */
 </style>

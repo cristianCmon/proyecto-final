@@ -6,9 +6,15 @@
   </div>
 </template>
 
+<script>
+  export default { name: 'App' }
+</script>
+
 <style>
+  @import "./styles/global.css";
+
 /* Estilos globales mínimos */
-body {
+/* body {
   margin: 0;
   font-family: sans-serif;
   background-color: #f4f4f9;
@@ -25,7 +31,7 @@ input {
   margin-bottom: 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+  box-sizing: border-box;
 }
 
 button {
@@ -42,7 +48,7 @@ button {
 
 button:hover {
   background-color: #4338ca;
-}
+} */
 </style>
 
 <!-- <script>
