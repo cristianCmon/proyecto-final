@@ -48,8 +48,8 @@ export default {
   methods: {
     handleLogout() {
       // Limpiamos el almacenamiento y volvemos al login
-      localStorage.clear();
-      this.$router.push('/');
+      sessionStorage.clear();
+      this.$router.push({name: 'Login'});
     }
   }
 }

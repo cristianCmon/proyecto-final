@@ -440,6 +440,7 @@ def crear_asistencia():
 
 ## USUARIOS
 @app.route('/usuarios', methods=['GET'])
+# @jwt_required() # Obliga envío de Token en la cabecera, evita accesos no deseados
 def obtener_usuarios():
     coleccion = db['usuarios']
     usuarios = []
