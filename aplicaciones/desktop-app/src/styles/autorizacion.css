@@ -1,0 +1,29 @@
+/* ESTILOS PARA VISTAS DE LOGIN Y REGISTRO */
+
+.auth-wrapper {
+  background: linear-gradient(135deg, #4f46e5 0%, #764ba2 100%);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  width: 380px; /* Ancho fijo para formularios */
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-footer {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
