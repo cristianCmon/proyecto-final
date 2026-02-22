@@ -17,7 +17,7 @@ const routes = [
       { path: 'registro', name: 'Registro', component: Registro },
     ]
   },
-  // VISTA INTERNA
+  // VISTA APLICACIÓN
   { path: '/dashboard', name: 'Dashboard', component: Dashboard }
 ];
 

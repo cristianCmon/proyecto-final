@@ -223,6 +223,22 @@
   width: auto;
 }
 
+.btn-reserve-small:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-full {
+  background-color: #64748b !important;
+}
+
+/* Animación de pulso suave para las plazas casi llenas */
+.capacity-warning {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
 .btn-delete-small {
   background-color: #ffffff;
   color: #ef4444;

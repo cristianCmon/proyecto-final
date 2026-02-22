@@ -32,7 +32,8 @@
       </header>
 
       <section class="scrollable-area">
-        
+
+        <!-- TAB ACTIVIDADES -->
         <div v-if="pestanaActiva === 'actividades'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
@@ -68,6 +69,7 @@
           </div>
         </div>
 
+        <!-- TAB SESIONES -->
         <div v-if="pestanaActiva === 'sesiones'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
@@ -103,7 +105,9 @@
                     </td>
                     <td><span :class="['status-pill', sesion.estado]">{{ sesion.estado }}</span></td>
                     <td>
-                      <button v-if="usuario.rol === 'cliente'" @click="reservarSesion(sesion.id)" class="btn-reserve-small">
+                      <button v-if="usuario.rol === 'cliente'" @click="reservarSesion(sesion.id)" 
+                        :disabled="sesion.capacidad_actual >= sesion.capacidad_maxima || sesion.estado === 'cancelada'"
+                        :class="['btn-reserve-small', { 'btn-full': sesion.capacidad_actual >= sesion.capacidad_maxima }]">
                         Reservar
                       </button>
                       <button v-if="usuario.rol === 'administrador'" @click="cancelarSesion(sesion.id)" class="btn-delete-small">
@@ -182,6 +186,7 @@ export default {
     return {
       pestanaActiva: 'actividades', // 'actividades' o 'sesiones'
       usuario: {
+        id: sessionStorage.getItem('idUsuario'),
         nombre_usuario: sessionStorage.getItem('nombre_usuario') || 'Usuario',
         rol: sessionStorage.getItem('rol') || 'cliente'
       },
@@ -229,7 +234,7 @@ export default {
   methods: {
     async refrescarDashboard() {
       this.cargando = true;
-
+      console.log(this.usuario);
       try {
         const [dataAct, dataSes] = await Promise.all([
           apiFetch('/actividades'),
@@ -355,6 +360,33 @@ export default {
         } catch (err) {
           alert("Error al anular la sesión.");
         }
+      }
+    },
+
+    async reservarSesion(idSesion) {
+      // Buscamos la sesión en nuestro array local para validar antes de enviar
+      const sesion = this.sesiones.find(s => s.id === idSesion);
+      
+      // Validación visual rápida
+      if (sesion.capacidad_actual >= sesion.capacidad_maxima) {
+        alert("Lo sentimos, esta clase ya está llena.");
+        return;
+      }
+
+      try {
+        // 3. Llamada al backend
+        // En el body enviamos el id_sesion. El id_usuario lo sacará el backend del token/sesión.
+        const res = await apiFetch('/reservas', {
+          method: 'POST',
+          body: JSON.stringify({ id_usuario: this.usuario.id, id_sesion: idSesion })
+        });
+
+        alert(res.mensaje || "¡Reserva realizada con éxito!.");
+        await this.refrescarDashboard();
+
+      } catch (err) {
+        console.error("Error al reservar:", err);
+        alert(err.ERROR || "No se pudo completar la reserva.");
       }
     },
 

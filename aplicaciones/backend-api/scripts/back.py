@@ -146,6 +146,7 @@ def loginUsuario():
         return jsonify({
             "token": token,
             "usuario": {
+                "id": str(usuario['_id']),
                 "nombre_usuario": usuario.get('nombre_usuario'),
                 "rol": usuario.get('rol')
             }

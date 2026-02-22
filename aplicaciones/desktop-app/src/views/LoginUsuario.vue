@@ -37,16 +37,15 @@ export default {
             contraseña: this.password // Tal cual lo espera tu Flask
           })
         });
+
         // GUARDAMOS DATOS USUARIO
         sessionStorage.setItem('tokenUsuario', data.token);
+        sessionStorage.setItem('idUsuario', data.usuario.id);
         sessionStorage.setItem('nombre_usuario', data.usuario.nombre_usuario); // Guardamos nombre
         sessionStorage.setItem('rol', data.usuario.rol); // Guardamos rol
         // CARGAMOS VISTA DASHBOARD SI LOGIN SATISFACTORIO
         this.$router.push('/dashboard');
-        // localStorage.setItem('user-token', data.token);
-        // const usuario = {tokenUsuario: data.token, nombre: data.nombre_usuario, rol: data.rol}
-        // sessionStorage.setItem(usuario);
-        
+
       } catch (err) {
         // 'err' aquí es el JSON de error que envía tu Flask (p.ej. {"ERROR": "..."})
         this.error = err.ERROR || "Error en el servidor";
