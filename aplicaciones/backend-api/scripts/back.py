@@ -513,7 +513,7 @@ def obtener_usuario(id):
         # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
         return jsonify({"ERROR": "ID no válido"}), 400
 
-## USUARIO/ID/RESERVAS REVISAR
+## USUARIO/ID/RESERVAS
 @app.route('/usuarios/<id_usuario>/reservas-activas', methods=['GET'])
 def obtener_reservas_activas(id_usuario):
     coleccionReservas = db['reservas']
@@ -852,6 +852,47 @@ def obtener_asistencia(id):
         # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
         return jsonify({"ERROR": "ID no válido"}), 400
 
+## OBTENER TODAS LAS ASISTENCIAS (VISTA ADMIN)
+@app.route('/asistencias/admin', methods=['GET'])
+def obtener_asistencias_formateadas():
+    try:
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "usuarios",
+                    "localField": "id_usuario",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "sesiones",
+                    "localField": "id_sesion",
+                    "foreignField": "_id",
+                    "as": "sesion"
+                }
+            },
+            {"$unwind": "$user"},
+            {"$unwind": "$sesion"},
+            {"$sort": {"sesion.fecha": -1}}
+        ]
+        
+        docs = list(db['asistencias'].aggregate(pipeline))
+        resultado = []
+
+        for d in docs:
+            resultado.append({
+                "id": str(d['_id']),
+                "nombre_usuario": d['user'].get('nombre_usuario'),
+                "actividad": d['sesion'].get('nombre'),
+                "fecha": d['sesion'].get('fecha'),
+                "estado": d.get('estado', 'Pendiente')
+            })
+        return jsonify(resultado), 200
+    
+    except Exception as e:
+        return jsonify({"ERROR": str(e)}), 500
 
 #### MÉTODOS PUT ####
 

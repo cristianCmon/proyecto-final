@@ -7,28 +7,30 @@
       </div>
       <nav class="menu">
         <!-- IMPORTANTE click.prevent PARA QUE EL ENRUTADOR NO ACTUALICE Y LLEVE A VISTA LOGIN -->
+        <!-- TAB ACTIVIDADES -->
         <a href="#" @click.prevent="tabActivo = 'actividades'" :class="['menu-item', { active: tabActivo === 'actividades' }]">
           <i>🏋️</i> Actividades
         </a>
+        <!-- TAB SESIONES -->
         <a href="#" @click.prevent="tabActivo = 'sesiones'" :class="['menu-item', { active: tabActivo === 'sesiones' }]">
           <i>📅</i> Sesiones
         </a>
-
+        <!-- TAB RESERVAS CLIENTE -->
         <div v-if="usuario.rol === 'cliente'" class="client-section">
-          <a href="#" @click.prevent="tabActivo = 'mis-reservas'" :class="['menu-item', { active: tabActivo === 'mis-reservas' }]">
+          <a href="#" @click.prevent="tabActivo = 'reservasUsuario'" :class="['menu-item', { active: tabActivo === 'reservasUsuario' }]">
             <i>📋</i> Mis Reservas
           </a>
         </div>
-
         <div v-if="usuario.rol === 'administrador'" class="admin-section">
-          <a href="#" @click.prevent="tabActivo = 'gestion-reservas'" :class="['menu-item', { active: tabActivo === 'gestion-reservas' }]">
+          <!-- TAB RESERVAS TOTALES (ADMIN) -->
+          <a href="#" @click.prevent="tabActivo = 'reservasTotales'" :class="['menu-item', { active: tabActivo === 'reservasTotales' }]">
             <i>📋</i> Reservas
           </a>
+          <!-- TAB ASISTENCIAS (ADMIN) -->
+          <a href="#" @click.prevent="tabActivo = 'asistencias'" :class="['menu-item', { active: tabActivo === 'asistencias' }]">
+            <i>✅</i> Asistencias
+          </a>
         </div>
-        <!-- <div v-if="usuario.rol === 'administrador'" class="admin-section">
-          <p class="section-label">Gestión</p>
-          <a href="#" class="menu-item"><i>👥</i> Usuarios</a>
-        </div> -->
       </nav>
       <button @click="cerrarSesion" class="btn-logout">Cerrar Sesión</button>
     </aside>
@@ -44,12 +46,12 @@
 
       <section class="scrollable-area">
 
-        <!-- TAB ACTIVIDADES -->
+        <!-- CONTENIDO TAB ACTIVIDADES -->
         <div v-if="tabActivo === 'actividades'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
               <h3>Oferta Actual</h3>
-              <!-- FORZAMOS VARIABLE editando A FALSE -->
+              <!-- FORZAMOS VARIABLE editando A FALSE PARA CONTROLAR CREAR/MODIFICAR -->
               <button v-if="usuario.rol === 'administrador'" @click="editando = false; mostrarModalActividad = true" class="btn-add">+ Nueva Actividad</button>
             </div>
 
@@ -61,18 +63,17 @@
                   <h4>{{ act.nombre }}</h4>
                   <p class="descripcion">{{ act.descripcion }}</p>
                   <!-- <div class="meta">
-                    <span>📍 {{ act.aula }}</span>
                     <span>👥 {{ act.capacidad_maxima }} plazas</span>
                   </div> -->
                 </div>
                 
                 <div v-if="usuario.rol === 'administrador'" class="act-actions">
-                  <button @click="generarSesiones(act.id)" class="btn-generate">
-                    🗓️ Generar Sesiones (7 días)
-                  </button>
-                  <div class="admin-btns-row">
-                    <button @click="modificarActividad(act)" class="btn-edit">✏️</button>
-                    <button @click="eliminarActividad(act.id)" class="btn-delete">🗑️</button>
+                  <div class="admin-controls-container">
+                    <button @click="generarSesiones(act.id)" class="btn-generate">
+                      Generar Sesiones
+                    </button>
+                    <button @click="modificarActividad(act)" class="btn-edit">Modificar</button>
+                    <button @click="eliminarActividad(act.id)" class="btn-delete">Borrar</button>
                   </div>
                 </div>
               </div>
@@ -80,7 +81,7 @@
           </div>
         </div>
 
-        <!-- TAB SESIONES -->
+        <!-- CONTENIDO TAB SESIONES -->
         <div v-if="tabActivo === 'sesiones'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
@@ -89,7 +90,7 @@
             </div>
 
             <div v-if="sesiones.length === 0" class="empty-state">
-              <p>No hay sesiones programadas. El administrador debe generar sesiones desde la pestaña de Actividades.</p>
+              <p>No hay sesiones programadas.</p>
             </div>
 
             <div v-else class="sesiones-table-container">
@@ -104,6 +105,7 @@
                     <th>Acción</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr v-for="sesion in sesiones" :key="sesion.id">
                     <td><strong>{{ sesion.nombre }}</strong></td>
@@ -132,8 +134,8 @@
           </div>
         </div>
 
-        <!-- TAB RESERVAS USUARIO -->
-        <div v-if="tabActivo === 'mis-reservas'" class="tab-content">
+        <!-- CONTENIDO TAB RESERVAS USUARIO -->
+        <div v-if="tabActivo === 'reservasUsuario'" class="tab-content">
           <div class="content-card">
             <h3>Reservas Actuales</h3>
             <div v-if="reservasUsuario.length === 0" class="empty-state">
@@ -150,6 +152,7 @@
                     <th>Acción</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr v-for="reserva in reservasUsuario" :key="reserva.id_reserva">
                     <td><strong>{{ reserva.actividad }}</strong></td>
@@ -167,15 +170,15 @@
           </div>
         </div>
 
-        <!-- TAB LISTADO TOTAL RESERVAS (ADMINISTRADOR) -->
-        <div v-if="tabActivo === 'gestion-reservas' && usuario.rol === 'administrador'" class="tab-content">
+        <!-- CONTENIDO TAB LISTADO TOTAL RESERVAS (ADMINISTRADOR) -->
+        <div v-if="tabActivo === 'reservasTotales' && usuario.rol === 'administrador'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
               <h3>Listado Reservas Totales</h3>
             </div>
 
             <div v-if="listadoTotalReservas.length === 0" class="empty-state">
-              <p>No existen registros de reservas en el sistema.</p>
+              <p>No hay registros de reservas.</p>
             </div>
 
             <div v-else class="sesiones-table-container">
@@ -189,14 +192,14 @@
                     <!-- <th>Acciones</th> -->
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr v-for="res in listadoTotalReservas" :key="res.id_reserva">
                     <td><strong>{{ res.nombre_usuario }}</strong></td>
                     <td>{{ res.actividad }}</td>
                     <td>
                       <div class="fecha-celda">
-                        <span>{{ formatearFecha(res.fecha) }}</span>
-                        <small>{{ res.hora_inicio }} - {{ res.hora_fin }}</small>
+                        <span>{{ formatearFecha(res.fecha) }} / {{ res.hora_inicio }} - {{ res.hora_fin }}</span>
                       </div>
                     </td>
                     <td>
@@ -216,6 +219,59 @@
           </div>
         </div>
 
+        <!-- CONTENIDO TAB LISTADO ASISTENCIAS (ADMINISTRADOR) -->
+        <div v-if="tabActivo === 'asistencias' && usuario.rol === 'administrador'" class="tab-content">
+          <div class="content-card">
+            <div class="header-section">
+              <h3>Registro de Asistencia</h3>
+            </div>
+
+            <div v-if="asistencias.length === 0" class="empty-state">
+              <p>No hay registros de asistencia.</p>
+            </div>
+
+            <div v-else class="sesiones-table-container">
+              <table class="sesiones-table">
+                <thead>
+                  <tr>
+                    <th>Alumno</th>
+                    <th>Actividad / Sesión</th>
+                    <th>Estado Actual</th>
+                    <th>Cambiar Estado</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr v-for="asis in asistencias" :key="asis.id">
+                    <td><strong>{{ asis.nombre_usuario }}</strong></td>
+                    <td>
+                      <div class="fecha-celda">
+                        <span>{{ asis.actividad }} / {{ formatearFecha(asis.fecha) }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span :class="['status-pill', asis.estado.replace(' ', '-').toLowerCase()]">
+                        {{ asis.estado }}
+                      </span>
+                    </td>
+                    <td>
+                      <select 
+                        :value="asis.estado" 
+                        @change="estadoAsistencia(asis.id, $event.target.value)"
+                        class="select-estado"
+                      >
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Presente">Presente</option>
+                        <option value="No presente">No presente</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </section>
     </main>
 
@@ -224,7 +280,7 @@
       <div class="modal-card">
         <header class="modal-header">
           <h3>{{ editando ? 'Modificar Actividad' : 'Configuración Nueva Actividad' }}</h3>
-          </header>
+        </header>
 
         <form @submit.prevent="guardarActividad" class="modal-form">
           <div class="form-group">
@@ -289,6 +345,7 @@ export default {
       sesiones: [],
       reservasUsuario: [],
       listadoTotalReservas: [],
+      asistencias: [],
       cargando: true,
 
       mostrarModalActividad: false,
@@ -309,8 +366,9 @@ export default {
     nombreTab() {
       if (this.tabActivo === 'actividades') return 'Catálogo de Actividades';
       if (this.tabActivo === 'sesiones') return 'Sesiones Programadas';
-      if (this.tabActivo === 'mis-reservas') return 'Mi Agenda Personal';
-      if (this.tabActivo === 'gestion-reservas') return 'Administración de Reservas';
+      if (this.tabActivo === 'reservasUsuario') return 'Mi Agenda Personal';
+      if (this.tabActivo === 'reservasTotales') return 'Administración de Reservas';
+      if (this.tabActivo === 'asistencias') return 'Control de Asistencia';
 
       return '';
     },
@@ -331,7 +389,8 @@ export default {
 
   async mounted() {
     await this.refrescarDashboard();
-    // console.log(this.listadoTotalReservas)
+    // console.log(this.listadoTotalReservas);
+    console.log(this.asistencias);
   },
 
   methods: {
@@ -352,9 +411,10 @@ export default {
           this.reservasUsuario = await apiFetch(`/usuarios/${this.usuario.id}/reservas-activas`);
         }
 
-        // CARGA LISTADO TOTAL RESERVAS FORMATEADAS PARA ADMINISTRADOR
+        // CARGA LISTADO TOTAL DE RESERVAS Y ASISTENCIAS FORMATEADAS
         if (this.usuario.rol === 'administrador') {
           this.listadoTotalReservas = await apiFetch('/reservas/admin');
+          this.asistencias = await apiFetch('/asistencias/admin');
         }
 
       } catch (err) {
@@ -465,7 +525,7 @@ export default {
             method: 'DELETE'
           });
 
-          alert("Sesión anulada.");
+          // REFRESCO SILENCIOSO
           await this.refrescarDashboard();
 
         } catch (err) {
@@ -530,6 +590,21 @@ export default {
         } catch (err) {
           alert("No se pudo eliminar.");
         }
+      }
+    },
+
+    async estadoAsistencia(idAsistencia, nuevoEstado) {
+      try {
+        await apiFetch(`/asistencias/${idAsistencia}`, {
+          method: 'PUT',
+          body: JSON.stringify({ estado: nuevoEstado })
+        });
+
+        // REFRESCO SILENCIONSO SIN ALERT
+        await this.refrescarDashboard();
+
+      } catch (err) {
+        alert("Error al actualizar asistencia");
       }
     },
 
