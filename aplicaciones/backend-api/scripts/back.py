@@ -1,6 +1,5 @@
 import os
 import json
-import datetime
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, render_template, send_from_directory, Response
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -304,7 +303,7 @@ def crear_sesion(id):
                 }
                 
                 # Evitar duplicados (mismo día y hora para esa actividad)
-                filtro = {"actividad_id": ObjectId(id), "fecha": fecha_analizada, "hora_inicio": h['hora_inicio']}
+                filtro = {"id_actividad": ObjectId(id), "fecha": fecha_analizada, "hora_inicio": h['hora_inicio']}
 
                 if not db['sesiones'].find_one(filtro):
                     db['sesiones'].insert_one(nueva_sesion)

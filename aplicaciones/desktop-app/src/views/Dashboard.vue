@@ -14,10 +14,16 @@
           <i>📅</i> Sesiones / Calendario
         </a>
 
-        <div v-if="usuario.rol === 'administrador'" class="admin-section">
+        <div v-if="usuario.rol === 'cliente'" class="client-section">
+          <p class="section-label">Mi Cuenta</p>
+          <a href="#" @click.prevent="pestanaActiva = 'mis-reservas'" :class="['menu-item', { active: pestanaActiva === 'mis-reservas' }]">
+            <i>📅</i> Mis Reservas
+          </a>
+        </div>
+        <!-- <div v-if="usuario.rol === 'administrador'" class="admin-section">
           <p class="section-label">Gestión</p>
           <a href="#" class="menu-item"><i>👥</i> Usuarios</a>
-        </div>
+        </div> -->
       </nav>
       <button @click="cerrarSesion" class="btn-logout">Cerrar Sesión</button>
     </aside>
@@ -112,6 +118,41 @@
                       </button>
                       <button v-if="usuario.rol === 'administrador'" @click="cancelarSesion(sesion.id)" class="btn-delete-small">
                         Anular
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB RESERVAS USUARIO -->
+        <div v-if="pestanaActiva === 'mis-reservas'" class="tab-content">
+          <div class="content-card">
+            <h3>Mi Agenda Personal</h3>
+            <div v-if="misReservas.length === 0" class="empty-state">
+              <p>Aún no te has apuntado a ninguna clase.</p>
+            </div>
+            
+            <div v-else class="sesiones-table-container">
+              <table class="sesiones-table">
+                <thead>
+                  <tr>
+                    <th>Actividad</th>
+                    <th>Fecha</th>
+                    <th>Horario</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="reserva in misReservas" :key="reserva.id">
+                    <td><strong>{{ reserva.nombre_actividad }}</strong></td>
+                    <td>{{ formatearFecha(reserva.fecha) }}</td>
+                    <td>{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
+                    <td>
+                      <button @click="cancelarReserva(reserva.id)" class="btn-delete-small">
+                        Anular Reserva
                       </button>
                     </td>
                   </tr>
@@ -234,7 +275,7 @@ export default {
   methods: {
     async refrescarDashboard() {
       this.cargando = true;
-      console.log(this.usuario);
+
       try {
         const [dataAct, dataSes] = await Promise.all([
           apiFetch('/actividades'),
@@ -242,9 +283,13 @@ export default {
         ]);
 
         this.actividades = dataAct;
-        console.log(this.actividades);
         this.sesiones = dataSes;
-        console.log(this.sesiones);
+
+        // CARGA RESERVAS ESPECÍFICAS DE CLIENTE
+        if (this.usuario.rol === 'cliente') {
+          // this.misReservas = await apiFetch('/mis-reservas'); // Endpoint GET /mis-reservas
+          this.misReservas = await apiFetch(`/reservas/${this.usuario.id}`);
+        }
 
       } catch (err) {
         console.error("Error al sincronizar:", err);
@@ -387,6 +432,19 @@ export default {
       } catch (err) {
         console.error("Error al reservar:", err);
         alert(err.ERROR || "No se pudo completar la reserva.");
+      }
+    },
+
+    async cancelarReserva(idReserva) {
+      if (confirm("¿Seguro que quieres cancelar tu plaza en esta clase?")) {
+        try {
+          await apiFetch(`/reservas/${idReserva}`, { method: 'DELETE' });
+          alert("Reserva cancelada correctamente.");
+          await this.refrescarDashboard(); // Recargamos para actualizar plazas y lista
+
+        } catch (err) {
+          alert("No se pudo cancelar la reserva.");
+        }
       }
     },
 
