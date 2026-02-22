@@ -3,7 +3,7 @@ import { apiFetch } from '../api';
 export default {
   data() {
     return {
-      tabActivo: 'actividades', // 'actividades' o 'sesiones'
+      tabActivo: 'actividades',
       usuario: {
         id: sessionStorage.getItem('idUsuario'),
         nombre_usuario: sessionStorage.getItem('nombre_usuario') || 'Usuario',
@@ -16,21 +16,24 @@ export default {
       asistencias: [],
       cargando: true,
 
-      mostrarModalActividad: false,
+			// CONFIGURACIÓN FORMULARIO ACTIVIDADES
       dias: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
       nuevaActividad: {
         nombre: '',
         descripcion: '',
         capacidad_maxima: 10,
-        horario: [] // Lista de objetos { dia, hora_inicio, hora_fin }
+        horario: []
       },
 
+			// CONTROL MODAL
+    	mostrarModalActividad: false,
       editando: false,
       idActividadEditable: null,
     }
   },
 
   computed: {
+		// DEVUELVE EL TÍTULO SEGÚN LA PESTAÑA DE FORMA DINÁMICA
     nombreTab() {
       if (this.tabActivo === 'actividades') return 'Catálogo de Actividades';
       if (this.tabActivo === 'sesiones') return 'Sesiones Programadas';
@@ -57,11 +60,10 @@ export default {
 
   async mounted() {
     await this.refrescarDashboard();
-    // console.log(this.listadoTotalReservas);
-    console.log(this.asistencias);
   },
 
   methods: {
+		// CARGA DE DATOS DESDE EL BACK AL INICIAR DASHBOARD Y EN LOS REFRESCOS
     async refrescarDashboard() {
       this.cargando = true;
 
@@ -98,41 +100,13 @@ export default {
         const res = await apiFetch(`/actividades/${id}/sesiones`, { method: 'POST' });
         alert(res.mensaje);
         await this.refrescarDashboard();
-        this.tabActivo = 'sesiones'; // Lleva automáticamente a ver las sesiones creadas
 
       } catch (err) {
         alert("Error: " + (err.ERROR || "No se pudo generar"));
       }
     },
 
-    formatearFecha(fechaStr) {
-      const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
-      return new Date(fechaStr).toLocaleDateString('es-ES', opciones);
-    },
-
-    cerrarSesion() {
-      sessionStorage.clear();
-      this.$router.push('/');
-    },
-
-    incluirHorario() {
-      if (this.aceptaMasHorarios) {
-        this.nuevaActividad.horario.push({
-          dia: this.diasDisponibles[0],
-          hora_inicio: '09:00',
-          hora_fin: '10:00'
-        });
-
-      } else {
-        alert("Ya has programado todos los días de la semana.");
-      }
-    },
-
-    quitarHorario(index) {
-      this.nuevaActividad.horario.splice(index, 1);
-    },
-
-    async guardarActividad() {
+		async guardarActividad() {
       // VALIDACIÓN CAPACIDAD MÍNIMA
       if (this.nuevaActividad.capacidad_maxima < 1) {
         alert("La capacidad debe ser al menos de 1 persona.");
@@ -167,7 +141,7 @@ export default {
       }
     },
 
-    async eliminarActividad(id) {
+		async eliminarActividad(id) {
       const confirmacion = confirm("¿Estás seguro de que quieres eliminar esta actividad?");
 
       if (confirmacion) {
@@ -186,7 +160,7 @@ export default {
       }
     },
 
-    async cancelarSesion(idSesion) {
+		async cancelarSesion(idSesion) {
       if (confirm("¿Seguro que quieres anular esta sesión?")) {
         try {
           await apiFetch(`/sesiones/${idSesion}`, {
@@ -202,19 +176,16 @@ export default {
       }
     },
 
-    async reservarSesion(idSesion) {
-      // Buscamos la sesión en nuestro array local para validar antes de enviar
+		async reservarSesion(idSesion) {
+      // BUSCAMOS SESIÓN PARA VALIDAR
       const sesion = this.sesiones.find(s => s.id === idSesion);
       
-      // Validación visual rápida
       if (sesion.capacidad_actual >= sesion.capacidad_maxima) {
         alert("Lo sentimos, esta clase ya está llena.");
         return;
       }
 
       try {
-        // 3. Llamada al backend
-        // En el body enviamos el id_sesion. El id_usuario lo sacará el backend del token/sesión.
         const res = await apiFetch('/reservas', {
           method: 'POST',
           body: JSON.stringify({ id_usuario: this.usuario.id, id_sesion: idSesion })
@@ -232,13 +203,11 @@ export default {
     async cancelarReserva(idReserva) {
       if (confirm("¿Quieres cancelarla? Si faltan menos de 15 minutos no se liberará la plaza.")) {
         try {
-          // Llamamos al PUT enviando el nuevo estado
           const res = await apiFetch(`/reservas/${idReserva}`, { 
             method: 'PUT',
             body: JSON.stringify({ estado: 'Cancelada' }) 
           });
 
-          // El backend devuelve un mensaje personalizado según el tiempo
           alert(res.mensaje); 
           await this.refrescarDashboard();
 
@@ -276,22 +245,50 @@ export default {
       }
     },
 
+
+    formatearFecha(fechaStr) {
+      const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+      return new Date(fechaStr).toLocaleDateString('es-ES', opciones);
+    },
+
+    incluirHorario() {
+      if (this.aceptaMasHorarios) {
+        this.nuevaActividad.horario.push({
+          dia: this.diasDisponibles[0],
+          hora_inicio: '09:00',
+          hora_fin: '10:00'
+        });
+
+      } else {
+        alert("Ya has programado todos los días de la semana.");
+      }
+    },
+
+    quitarHorario(index) {
+      this.nuevaActividad.horario.splice(index, 1);
+    },
+
     modificarActividad(actividad) {
       this.editando = true;
       this.idActividadEditable = actividad.id;
       
-      // Clonamos los datos para no modificar la lista original por error
+      // HACEMOS COPIA DEL ORIGINAL
       this.nuevaActividad = JSON.parse(JSON.stringify(actividad));
       
       this.mostrarModalActividad = true;
     },
 
-    // Ajustamos el botón de cerrar o cancelar para resetear el estado
+    // LIMPIAMOS PARA RESETEAR EL MODAL
     cerrarLimpiarModal() {
       this.mostrarModalActividad = false;
       this.editando = false;
       this.idActividadEditable = null;
       this.nuevaActividad = { nombre: '', descripcion: '', capacidad_maxima: 10, horario: [] };
+    },
+
+		cerrarSesion() {
+      sessionStorage.clear();
+      this.$router.push('/');
     }
   }
 }
