@@ -513,6 +513,60 @@ def obtener_usuario(id):
         # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
         return jsonify({"ERROR": "ID no válido"}), 400
 
+## USUARIO/ID/RESERVAS REVISAR
+@app.route('/usuarios/<id_usuario>/reservas-activas', methods=['GET'])
+def obtener_reservas_activas(id_usuario):
+    coleccionReservas = db['reservas']
+    
+    try:
+        if not ObjectId.is_valid(id_usuario):
+            return jsonify({"ERROR": "ID de usuario no válido"}), 400
+
+        # Usamos agregación para traer los datos de la sesión vinculada
+        pipeline = [
+            {
+                "$match": {
+                    "id_usuario": ObjectId(id_usuario),
+                    "estado": "Confirmada"
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "sesiones",           # Colección con la que unimos
+                    "localField": "id_sesion",     # Campo en 'reservas'
+                    "foreignField": "_id",         # Campo en 'sesiones'
+                    "as": "detalle_sesion"         # Nombre del nuevo campo
+                }
+            },
+            { "$unwind": "$detalle_sesion" },      # Convertimos el array de 1 elemento en un objeto
+            {
+                # Solo traemos las sesiones que no han pasado (opcional)
+                "$match": {
+                    "detalle_sesion.fecha": {"$gte": datetime.now().replace(hour=0, minute=0)}
+                }
+            },
+            { "$sort": { "detalle_sesion.fecha": 1, "detalle_sesion.hora_inicio": 1 } }
+        ]
+
+        resultados = list(coleccionReservas.aggregate(pipeline))
+
+        # Formateamos la respuesta
+        reservas_formateadas = []
+        for res in resultados:
+            reservas_formateadas.append({
+                "id_reserva": str(res['_id']),
+                "id_sesion": str(res['id_sesion']),
+                "actividad": res['detalle_sesion'].get('nombre'),
+                "fecha": res['detalle_sesion']['fecha'].isoformat() if isinstance(res['detalle_sesion']['fecha'], datetime) else res['detalle_sesion']['fecha'],
+                "hora_inicio": res['detalle_sesion'].get('hora_inicio'),
+                "hora_fin": res['detalle_sesion'].get('hora_fin')
+            })
+
+        return jsonify(reservas_formateadas), 200
+
+    except Exception as e:
+        return jsonify({"ERROR": "Error al obtener reservas", "Detalle": str(e)}), 500
+
 ## ACTIVIDADES
 @app.route('/actividades', methods=['GET'])
 def obtener_actividades():

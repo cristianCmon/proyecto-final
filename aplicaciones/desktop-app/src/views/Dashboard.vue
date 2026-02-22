@@ -146,12 +146,12 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="reserva in misReservas" :key="reserva.id">
-                    <td><strong>{{ reserva.nombre_actividad }}</strong></td>
+                  <tr v-for="reserva in misReservas" :key="reserva.id_reserva">
+                    <td><strong>{{ reserva.actividad }}</strong></td>
                     <td>{{ formatearFecha(reserva.fecha) }}</td>
                     <td>{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
                     <td>
-                      <button @click="cancelarReserva(reserva.id)" class="btn-delete-small">
+                      <button @click="cancelarReserva(reserva.id_reserva)" class="btn-delete-small">
                         Anular Reserva
                       </button>
                     </td>
@@ -287,8 +287,8 @@ export default {
 
         // CARGA RESERVAS ESPECÍFICAS DE CLIENTE
         if (this.usuario.rol === 'cliente') {
-          // this.misReservas = await apiFetch('/mis-reservas'); // Endpoint GET /mis-reservas
-          this.misReservas = await apiFetch(`/reservas/${this.usuario.id}`);
+          // this.misReservas = await apiFetch(`/reservas/${this.usuario.id}`);
+          this.misReservas = await apiFetch(`/usuarios/${this.usuario.id}/reservas-activas`);
         }
 
       } catch (err) {
@@ -436,7 +436,8 @@ export default {
     },
 
     async cancelarReserva(idReserva) {
-      if (confirm("¿Seguro que quieres cancelar tu plaza en esta clase?")) {
+      console.log(idReserva);
+      if (confirm("¿Seguro que quieres cancelar tu plaza en esta actividad?")) {
         try {
           await apiFetch(`/reservas/${idReserva}`, { method: 'DELETE' });
           alert("Reserva cancelada correctamente.");
