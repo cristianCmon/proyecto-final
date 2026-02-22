@@ -42,6 +42,7 @@ def favicon():
         'favicon-32x32.png', mimetype='image/vnd.microsoft.icon')
 
 
+
 #### MÉTODOS POST ####
 
 ## REGISTRAR USUARIO EN APP
@@ -64,10 +65,6 @@ def registroUsuario():
     email = datos.get('email')
     dni = datos.get('dni')
     passPlana = datos.get('contraseña')
-
-    # Validación de existencia en formulario de campos obligatorios
-    # if not nombre_usuario or not passPlana or not email or not dni:
-    #     return jsonify({"ERROR": "Debe rellenar los campos obligatorios (nombre de usuario, contraseña, email, dni)"}), 400
 
     # Comprobación de existencia en base de datos de los campos únicos anteriores
     usuario_existente = coleccion.find_one({
@@ -113,7 +110,6 @@ def registroUsuario():
          "id": str(idGeneradoNuevoUsuario)
     }), 201
 
-
 ## LOGIN USUARIO EN APP
 @app.route('/auth/login', methods=['POST'])
 def loginUsuario():
@@ -153,8 +149,7 @@ def loginUsuario():
     
     return jsonify({"ERROR": "Nombre de usuario o contraseña incorrectos"}), 401
 
-
-## USUARIO (obsoleto)
+## USUARIO (obsoleto, válido para crear admins)
 @app.route('/usuarios', methods=['POST'])
 def crear_usuario():
     coleccion = db['usuarios']
@@ -172,7 +167,7 @@ def crear_usuario():
         return jsonify({"ERROR": "Debe rellenar los campos obligatorios (nombre de usuario, contraseña, email, dni)"}), 400
 
     # Comprobación de existencia en base de datos de los campos únicos anteriores
-    usuario_existente = coleccion.find_one({
+    usuarioExistente = coleccion.find_one({
         "$or": [ # El operador $or devuelve un documento si coincide cualquiera de las condiciones 
             {"nombre_usuario": nombre_usuario},
             {"email": email},
@@ -181,10 +176,10 @@ def crear_usuario():
     })
 
     # Si ya existe un usuario personalizamos el mensaje según qué campo falló
-    if usuario_existente:
-        if usuario_existente.get('email') == email:
+    if usuarioExistente:
+        if usuarioExistente.get('email') == email:
             mensaje = "Ese email ya está registrado"
-        elif usuario_existente.get('dni') == dni:
+        elif usuarioExistente.get('dni') == dni:
             mensaje = "Ese DNI ya está registrado"
         else:
             mensaje = "El nombre de usuario ya está en uso"
@@ -211,11 +206,11 @@ def crear_usuario():
     }
 
     # Insertarmos nuevo registro en la base de datos
-    id_insertado = coleccion.insert_one(nuevoUsuario).inserted_id
+    idInsertado = coleccion.insert_one(nuevoUsuario).inserted_id
 
     return jsonify({
         "mensaje": "Usuario creado",
-        "id": str(id_insertado),
+        "id": str(idInsertado),
         "fecha_alta": nuevoUsuario["fecha_alta"].isoformat()
     }), 201
 
@@ -522,29 +517,31 @@ def obtener_reservas_activas(id_usuario):
         if not ObjectId.is_valid(id_usuario):
             return jsonify({"ERROR": "ID de usuario no válido"}), 400
 
-        # Usamos agregación para traer los datos de la sesión vinculada
+        # Procesado por etapas
         pipeline = [
-            {
+            {   # FILTRO, SÓLO RESERVAS CONFIRMADAS DEL USUARIO
                 "$match": {
                     "id_usuario": ObjectId(id_usuario),
                     "estado": "Confirmada"
                 }
             },
-            {
+            {   # JOIN A SESIONES, UNIMOS POR ID Y GUARDAMOS LA LISTA RESULTANTE EN "detalle_sesion"
                 "$lookup": {
-                    "from": "sesiones",           # Colección con la que unimos
-                    "localField": "id_sesion",     # Campo en 'reservas'
-                    "foreignField": "_id",         # Campo en 'sesiones'
-                    "as": "detalle_sesion"         # Nombre del nuevo campo
+                    "from": "sesiones",
+                    "localField": "id_sesion",
+                    "foreignField": "_id",
+                    "as": "detalle_sesion"
                 }
             },
-            { "$unwind": "$detalle_sesion" },      # Convertimos el array de 1 elemento en un objeto
-            {
-                # Solo traemos las sesiones que no han pasado (opcional)
+            {   # "DESENROLLA LOS ARRAYS CONTENIDOS Y LOS CONVIERTE EN OBJETOS"
+                "$unwind": "$detalle_sesion"
+            },
+            {   # FILTRA LAS FECHAS ANTERIORES A LA ACTUAL, SÓLO PASAN LAS DE AHORA EN ADELANTE 
                 "$match": {
                     "detalle_sesion.fecha": {"$gte": datetime.now().replace(hour=0, minute=0)}
                 }
             },
+                # ORDENA POR FECHA ASCENDENTE Y POR LA HORA
             { "$sort": { "detalle_sesion.fecha": 1, "detalle_sesion.hora_inicio": 1 } }
         ]
 
@@ -769,7 +766,7 @@ def obtener_reservas_formateadas():
             },
             {"$unwind": "$user"},
             {"$unwind": "$sesion"},
-            { "$sort": { "sesion.fecha": -1 } } # Mostrar las más recientes primero
+            { "$sort": { "sesion.fecha": -1 } }
         ]
         
         reservas = list(db['reservas'].aggregate(pipeline))
@@ -894,6 +891,7 @@ def obtener_asistencias_formateadas():
     except Exception as e:
         return jsonify({"ERROR": str(e)}), 500
 
+
 #### MÉTODOS PUT ####
 
 ## USUARIO/ID
@@ -902,7 +900,6 @@ def actualizar_usuario(id):
     coleccion = db['usuarios']
 
     try:
-        # Obtener los nuevos datos del cuerpo de la petición
         datosActualizados = request.json
 
         if not datosActualizados:
@@ -913,14 +910,12 @@ def actualizar_usuario(id):
             # datosActualizados['contraseña'] = generate_password_hash(datosActualizados['contraseña'])
             datosActualizados['contraseña'] = bcrypt.generate_password_hash(datosActualizados['contraseña']).decode('utf-8')
 
-        # Ejecutar la actualización en MongoDB
-        # Usamos $set para modificar solo los campos enviados sin borrar el resto
+        # Con $set sólo se modifican los campos enviados
         resultado = coleccion.update_one(
             {"_id": ObjectId(id)},
             {"$set": datosActualizados}
         )
 
-        # Verificar si se encontró y actualizó
         if resultado.matched_count == 0:
             return jsonify({"ERROR": "Usuario no encontrado"}), 404
         
@@ -949,7 +944,7 @@ def actualizar_actividad(id):
         if 'capacidad_maxima' in datosActualizados:
             datosActualizados['capacidad_maxima'] = int(datosActualizados['capacidad_maxima'])
 
-        # Si envían horario, validamos que sea una lista (el nuevo formato que definimos)
+        # Si envían horario, validamos que sea una lista
         if 'horario' in datosActualizados:
             if not isinstance(datosActualizados['horario'], list):
                 return jsonify({"ERROR": "El campo 'horario' debe ser una lista"}), 400

@@ -36,6 +36,7 @@ async function createWindow() {
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     // LA SIGUIENTE LÍNEA ABRE EL MODO DESARROLLADOR
     if (!process.env.IS_TEST) win.webContents.openDevTools()
+      
   } else {
     createProtocol('app')
     // Load the index.html when not in development

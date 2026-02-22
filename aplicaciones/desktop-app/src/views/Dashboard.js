@@ -1,4 +1,5 @@
 import { apiFetch } from '../api';
+/* eslint-disable */
 
 export default {
   data() {
@@ -291,4 +292,5 @@ export default {
       this.$router.push('/');
     }
   }
+	
 }
