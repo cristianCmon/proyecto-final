@@ -366,7 +366,7 @@ def crear_reserva():
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
             "id_reserva": id_reserva,
-            "estado": "Presente" # Presente/No presente/Cancelada
+            "estado": "Pendiente" # Pendiente/Presente/No presente/Cancelada
         }
 
         coleccionAsistencias.insert_one(nuevaAsistencia)
@@ -423,7 +423,7 @@ def crear_asistencia():
             "id_usuario": ObjectId(id_usuario),
             "id_sesion": ObjectId(id_sesion),
             "id_reserva": reserva['_id'],
-            "estado": "Presente" # Presente/No presente/Cancelada
+            "estado": "Pendiente" # Pendiente/Presente/No presente/Cancelada
         }
 
         id_insertado = coleccion.insert_one(nuevaAsistencia).inserted_id
