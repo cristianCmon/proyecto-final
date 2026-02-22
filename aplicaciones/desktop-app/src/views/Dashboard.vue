@@ -11,13 +11,18 @@
           <i>🏋️</i> Actividades
         </a>
         <a href="#" @click.prevent="tabActivo = 'sesiones'" :class="['menu-item', { active: tabActivo === 'sesiones' }]">
-          <i>📅</i> Sesiones / Calendario
+          <i>📅</i> Sesiones
         </a>
 
         <div v-if="usuario.rol === 'cliente'" class="client-section">
-          <p class="section-label">Mi Cuenta</p>
           <a href="#" @click.prevent="tabActivo = 'mis-reservas'" :class="['menu-item', { active: tabActivo === 'mis-reservas' }]">
-            <i>📅</i> Mis Reservas
+            <i>📋</i> Mis Reservas
+          </a>
+        </div>
+
+        <div v-if="usuario.rol === 'administrador'" class="admin-section">
+          <a href="#" @click.prevent="tabActivo = 'gestion-reservas'" :class="['menu-item', { active: tabActivo === 'gestion-reservas' }]">
+            <i>📋</i> Reservas
           </a>
         </div>
         <!-- <div v-if="usuario.rol === 'administrador'" class="admin-section">
@@ -43,7 +48,7 @@
         <div v-if="tabActivo === 'actividades'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
-              <h3>Oferta de Actividades</h3>
+              <h3>Oferta Actual</h3>
               <!-- FORZAMOS VARIABLE editando A FALSE -->
               <button v-if="usuario.rol === 'administrador'" @click="editando = false; mostrarModalActividad = true" class="btn-add">+ Nueva Actividad</button>
             </div>
@@ -163,14 +168,13 @@
         </div>
 
         <!-- TAB LISTADO TOTAL RESERVAS (ADMINISTRADOR) -->
-        <div v-if="pestanaActiva === 'gestion-reservas' && usuario.rol === 'administrador'" class="tab-content">
+        <div v-if="tabActivo === 'gestion-reservas' && usuario.rol === 'administrador'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
-              <h3>Panel de Control de Reservas</h3>
-              <button @click="refrescarDashboard" class="btn-generate">🔄 Actualizar Lista</button>
+              <h3>Listado Reservas Totales</h3>
             </div>
 
-            <div v-if="todasLasReservas.length === 0" class="empty-state">
+            <div v-if="listadoTotalReservas.length === 0" class="empty-state">
               <p>No existen registros de reservas en el sistema.</p>
             </div>
 
@@ -182,11 +186,11 @@
                     <th>Actividad</th>
                     <th>Fecha y Hora</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+                    <!-- <th>Acciones</th> -->
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="res in todasLasReservas" :key="res.id_reserva">
+                  <tr v-for="res in listadoTotalReservas" :key="res.id_reserva">
                     <td><strong>{{ res.nombre_usuario }}</strong></td>
                     <td>{{ res.actividad }}</td>
                     <td>
@@ -200,11 +204,11 @@
                         {{ res.estado }}
                       </span>
                     </td>
-                    <td>
+                    <!-- <td>
                       <button @click="eliminarReserva(res.id_reserva)" class="btn-delete-small">
-                        🗑️ Eliminar
+                        Eliminar
                       </button>
-                    </td>
+                    </td> -->
                   </tr>
                 </tbody>
               </table>
@@ -327,6 +331,7 @@ export default {
 
   async mounted() {
     await this.refrescarDashboard();
+    // console.log(this.listadoTotalReservas)
   },
 
   methods: {
@@ -349,7 +354,7 @@ export default {
 
         // CARGA LISTADO TOTAL RESERVAS FORMATEADAS PARA ADMINISTRADOR
         if (this.usuario.rol === 'administrador') {
-          this.todasLasReservas = await apiFetch('/reservas/admin'); 
+          this.listadoTotalReservas = await apiFetch('/reservas/admin');
         }
 
       } catch (err) {

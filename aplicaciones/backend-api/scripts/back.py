@@ -551,9 +551,10 @@ def obtener_reservas_activas(id_usuario):
         resultados = list(coleccionReservas.aggregate(pipeline))
 
         # Formateamos la respuesta
-        reservas_formateadas = []
+        reservasFormateadas = []
+
         for res in resultados:
-            reservas_formateadas.append({
+            reservasFormateadas.append({
                 "id_reserva": str(res['_id']),
                 "id_sesion": str(res['id_sesion']),
                 "actividad": res['detalle_sesion'].get('nombre'),
@@ -562,7 +563,7 @@ def obtener_reservas_activas(id_usuario):
                 "hora_fin": res['detalle_sesion'].get('hora_fin')
             })
 
-        return jsonify(reservas_formateadas), 200
+        return jsonify(reservasFormateadas), 200
 
     except Exception as e:
         return jsonify({"ERROR": "Error al obtener reservas", "Detalle": str(e)}), 500
@@ -744,6 +745,52 @@ def obtener_reserva(id):
     except Exception as e:
         # Esto captura errores si el ID enviado no tiene el formato válido de MongoDB
         return jsonify({"ERROR": "ID no válido"}), 400
+
+## OBTENER TODAS LAS RESERVAS (VISTA ADMIN)
+@app.route('/reservas/admin', methods=['GET'])
+def obtener_reservas_formateadas():
+    try:
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "usuarios",
+                    "localField": "id_usuario",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "sesiones",
+                    "localField": "id_sesion",
+                    "foreignField": "_id",
+                    "as": "sesion"
+                }
+            },
+            {"$unwind": "$user"},
+            {"$unwind": "$sesion"},
+            { "$sort": { "sesion.fecha": -1 } } # Mostrar las más recientes primero
+        ]
+        
+        reservas = list(db['reservas'].aggregate(pipeline))
+        
+        resultado = []
+
+        for r in reservas:
+            resultado.append({
+                "id_reserva": str(r['_id']),
+                "nombre_usuario": r['user'].get('nombre_usuario'),
+                "actividad": r['sesion'].get('nombre'),
+                "fecha": r['sesion']['fecha'].isoformat() if isinstance(r['sesion']['fecha'], datetime) else r['sesion']['fecha'],
+                "hora_inicio": r['sesion'].get('hora_inicio'),
+                "hora_fin": r['sesion'].get('hora_fin'),
+                "estado": r.get('estado', 'Confirmada')
+            })
+            
+        return jsonify(resultado), 200
+    
+    except Exception as e:
+        return jsonify({"ERROR": str(e)}), 500
 
 ## ASISTENCIAS
 @app.route('/asistencias', methods=['GET'])
