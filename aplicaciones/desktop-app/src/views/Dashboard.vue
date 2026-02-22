@@ -7,16 +7,16 @@
       </div>
       <nav class="menu">
         <!-- IMPORTANTE click.prevent PARA QUE EL ENRUTADOR NO ACTUALICE Y LLEVE A VISTA LOGIN -->
-        <a href="#" @click.prevent="pestanaActiva = 'actividades'" :class="['menu-item', { active: pestanaActiva === 'actividades' }]">
+        <a href="#" @click.prevent="tabActivo = 'actividades'" :class="['menu-item', { active: tabActivo === 'actividades' }]">
           <i>🏋️</i> Actividades
         </a>
-        <a href="#" @click.prevent="pestanaActiva = 'sesiones'" :class="['menu-item', { active: pestanaActiva === 'sesiones' }]">
+        <a href="#" @click.prevent="tabActivo = 'sesiones'" :class="['menu-item', { active: tabActivo === 'sesiones' }]">
           <i>📅</i> Sesiones / Calendario
         </a>
 
         <div v-if="usuario.rol === 'cliente'" class="client-section">
           <p class="section-label">Mi Cuenta</p>
-          <a href="#" @click.prevent="pestanaActiva = 'mis-reservas'" :class="['menu-item', { active: pestanaActiva === 'mis-reservas' }]">
+          <a href="#" @click.prevent="tabActivo = 'mis-reservas'" :class="['menu-item', { active: tabActivo === 'mis-reservas' }]">
             <i>📅</i> Mis Reservas
           </a>
         </div>
@@ -31,7 +31,7 @@
     <main class="main-content">
       <header class="top-bar">
         <div class="page-info">
-          <h2>{{ tituloPestana }}</h2>
+          <h2>{{ nombreTab }}</h2>
           <p>Bienvenido, <strong>{{ usuario.nombre_usuario }}</strong></p>
         </div>
         <div class="user-badge" :class="usuario.rol">{{ usuario.rol }}</div>
@@ -40,7 +40,7 @@
       <section class="scrollable-area">
 
         <!-- TAB ACTIVIDADES -->
-        <div v-if="pestanaActiva === 'actividades'" class="tab-content">
+        <div v-if="tabActivo === 'actividades'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
               <h3>Oferta de Actividades</h3>
@@ -76,7 +76,7 @@
         </div>
 
         <!-- TAB SESIONES -->
-        <div v-if="pestanaActiva === 'sesiones'" class="tab-content">
+        <div v-if="tabActivo === 'sesiones'" class="tab-content">
           <div class="content-card">
             <div class="header-section">
               <h3>Próximas Sesiones</h3>
@@ -128,11 +128,11 @@
         </div>
 
         <!-- TAB RESERVAS USUARIO -->
-        <div v-if="pestanaActiva === 'mis-reservas'" class="tab-content">
+        <div v-if="tabActivo === 'mis-reservas'" class="tab-content">
           <div class="content-card">
-            <h3>Mi Agenda Personal</h3>
-            <div v-if="misReservas.length === 0" class="empty-state">
-              <p>Aún no te has apuntado a ninguna clase.</p>
+            <h3>Reservas Actuales</h3>
+            <div v-if="reservasUsuario.length === 0" class="empty-state">
+              <p>Aún no te has apuntado a ninguna actividad.</p>
             </div>
             
             <div v-else class="sesiones-table-container">
@@ -146,13 +146,63 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="reserva in misReservas" :key="reserva.id_reserva">
+                  <tr v-for="reserva in reservasUsuario" :key="reserva.id_reserva">
                     <td><strong>{{ reserva.actividad }}</strong></td>
                     <td>{{ formatearFecha(reserva.fecha) }}</td>
                     <td>{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
                     <td>
                       <button @click="cancelarReserva(reserva.id_reserva)" class="btn-delete-small">
                         Anular Reserva
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB LISTADO TOTAL RESERVAS (ADMINISTRADOR) -->
+        <div v-if="pestanaActiva === 'gestion-reservas' && usuario.rol === 'administrador'" class="tab-content">
+          <div class="content-card">
+            <div class="header-section">
+              <h3>Panel de Control de Reservas</h3>
+              <button @click="refrescarDashboard" class="btn-generate">🔄 Actualizar Lista</button>
+            </div>
+
+            <div v-if="todasLasReservas.length === 0" class="empty-state">
+              <p>No existen registros de reservas en el sistema.</p>
+            </div>
+
+            <div v-else class="sesiones-table-container">
+              <table class="sesiones-table">
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Actividad</th>
+                    <th>Fecha y Hora</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="res in todasLasReservas" :key="res.id_reserva">
+                    <td><strong>{{ res.nombre_usuario }}</strong></td>
+                    <td>{{ res.actividad }}</td>
+                    <td>
+                      <div class="fecha-celda">
+                        <span>{{ formatearFecha(res.fecha) }}</span>
+                        <small>{{ res.hora_inicio }} - {{ res.hora_fin }}</small>
+                      </div>
+                    </td>
+                    <td>
+                      <span :class="['status-pill', res.estado.toLowerCase()]">
+                        {{ res.estado }}
+                      </span>
+                    </td>
+                    <td>
+                      <button @click="eliminarReserva(res.id_reserva)" class="btn-delete-small">
+                        🗑️ Eliminar
                       </button>
                     </td>
                   </tr>
@@ -225,7 +275,7 @@ import { apiFetch } from '../api';
 export default {
   data() {
     return {
-      pestanaActiva: 'actividades', // 'actividades' o 'sesiones'
+      tabActivo: 'actividades', // 'actividades' o 'sesiones'
       usuario: {
         id: sessionStorage.getItem('idUsuario'),
         nombre_usuario: sessionStorage.getItem('nombre_usuario') || 'Usuario',
@@ -233,6 +283,8 @@ export default {
       },
       actividades: [],
       sesiones: [],
+      reservasUsuario: [],
+      listadoTotalReservas: [],
       cargando: true,
 
       mostrarModalActividad: false,
@@ -250,8 +302,13 @@ export default {
   },
 
   computed: {
-    tituloPestana() {
-      return this.pestanaActiva === 'actividades' ? 'Catálogo de Actividades' : 'Calendario de Sesiones';
+    nombreTab() {
+      if (this.tabActivo === 'actividades') return 'Catálogo de Actividades';
+      if (this.tabActivo === 'sesiones') return 'Sesiones Programadas';
+      if (this.tabActivo === 'mis-reservas') return 'Mi Agenda Personal';
+      if (this.tabActivo === 'gestion-reservas') return 'Administración de Reservas';
+
+      return '';
     },
 
     // FILTRA DÍAS DISPONIBLES EN FORMULARIO ACTIVIDAD
@@ -287,8 +344,12 @@ export default {
 
         // CARGA RESERVAS ESPECÍFICAS DE CLIENTE
         if (this.usuario.rol === 'cliente') {
-          // this.misReservas = await apiFetch(`/reservas/${this.usuario.id}`);
-          this.misReservas = await apiFetch(`/usuarios/${this.usuario.id}/reservas-activas`);
+          this.reservasUsuario = await apiFetch(`/usuarios/${this.usuario.id}/reservas-activas`);
+        }
+
+        // CARGA LISTADO TOTAL RESERVAS FORMATEADAS PARA ADMINISTRADOR
+        if (this.usuario.rol === 'administrador') {
+          this.todasLasReservas = await apiFetch('/reservas/admin'); 
         }
 
       } catch (err) {
@@ -304,7 +365,7 @@ export default {
         const res = await apiFetch(`/actividades/${id}/sesiones`, { method: 'POST' });
         alert(res.mensaje);
         await this.refrescarDashboard();
-        this.pestanaActiva = 'sesiones'; // Lleva automáticamente a ver las sesiones creadas
+        this.tabActivo = 'sesiones'; // Lleva automáticamente a ver las sesiones creadas
 
       } catch (err) {
         alert("Error: " + (err.ERROR || "No se pudo generar"));
@@ -436,15 +497,33 @@ export default {
     },
 
     async cancelarReserva(idReserva) {
-      console.log(idReserva);
-      if (confirm("¿Seguro que quieres cancelar tu plaza en esta actividad?")) {
+      if (confirm("¿Quieres cancelarla? Si faltan menos de 15 minutos no se liberará la plaza.")) {
         try {
-          await apiFetch(`/reservas/${idReserva}`, { method: 'DELETE' });
-          alert("Reserva cancelada correctamente.");
-          await this.refrescarDashboard(); // Recargamos para actualizar plazas y lista
+          // Llamamos al PUT enviando el nuevo estado
+          const res = await apiFetch(`/reservas/${idReserva}`, { 
+            method: 'PUT',
+            body: JSON.stringify({ estado: 'Cancelada' }) 
+          });
+
+          // El backend devuelve un mensaje personalizado según el tiempo
+          alert(res.mensaje); 
+          await this.refrescarDashboard();
 
         } catch (err) {
-          alert("No se pudo cancelar la reserva.");
+          alert("Error al procesar la cancelación: " + (err.ERROR || "Inténtelo de nuevo"));
+        }
+      }
+    },
+
+    async eliminarReserva(idReserva) {
+      if (confirm("¿Estás seguro de eliminar esta reserva permanentemente? Se actualizará el cupo si estaba confirmada.")) {
+        try {
+          await apiFetch(`/reservas/${idReserva}`, { method: 'DELETE' });
+          alert("Reserva eliminada.");
+          await this.refrescarDashboard();
+
+        } catch (err) {
+          alert("No se pudo eliminar.");
         }
       }
     },
