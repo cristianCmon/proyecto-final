@@ -9,7 +9,8 @@ Aplicación multiplataforma de gestión de actividades de un gimnasio.
 - Configuraciones iniciales enrevesadas en algunos casos.
 - Tiempo requerido en conocer las nuevas tecnologías.
 - Sintaxis poco amigable en consultas complejas de MongoDB.
-- Dificultades de comunicación entre front y back.
+- Problema de comunicación específico entre el front de móvil y el back.
+- Dificultades generales de comunicación entre front y back.
 
 ## Diagramas de casos de uso
 ![Caso1](./capturas/caso-1.png)
