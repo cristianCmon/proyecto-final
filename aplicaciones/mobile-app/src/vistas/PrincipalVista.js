@@ -11,7 +11,7 @@ export default function PrincipalVista({ route }) {
       const res = await fetch(`${BASE_URL}/sesiones`);
       const data = await res.json();
       setSesiones(data);
-      
+
     } catch (e) { console.log(e); }
   };
 
@@ -47,6 +47,7 @@ export default function PrincipalVista({ route }) {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.title}>{item.nombre}</Text>
+            <Text>{new Date(item.fecha).toLocaleDateString('es-ES')}</Text>
             <Text>{item.hora_inicio} - {item.hora_fin}</Text>
             <Text>Libres: {item.capacidad_maxima - item.capacidad_actual}</Text>
             <TouchableOpacity 
@@ -68,5 +69,5 @@ const styles = StyleSheet.create({
   welcome: { fontSize: 18, marginBottom: 15, fontWeight: 'bold' },
   card: { backgroundColor: '#fff', padding: 20, borderRadius: 12, marginBottom: 15, elevation: 2 },
   title: { fontSize: 20, fontWeight: 'bold', color: '#2c3e50' },
-  btn: { backgroundColor: '#3498db', padding: 12, borderRadius: 6, marginTop: 10, alignItems: 'center' }
+  btn: { backgroundColor: '#764ba2', padding: 12, borderRadius: 6, marginTop: 10, alignItems: 'center' }
 });

@@ -41,7 +41,7 @@ export default function RegistroVista({ navigation }) {
           onChangeText={(val) => setForm({ ...form, [key]: val })}
         />
       ))}
-      <Button title="Confirmar Registro" onPress={handleRegistro} color="#2ecc71" />
+      <Button title="Confirmar Registro" onPress={handleRegistro} color="#4f46e5" />
     </ScrollView>
   );
 }

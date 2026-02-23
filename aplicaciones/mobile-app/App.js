@@ -1,3 +1,4 @@
+// PLANTILLA POR DEFECTO
 // import { StatusBar } from 'expo-status-bar';
 // import { StyleSheet, Text, View } from 'react-native';
 
@@ -19,17 +20,14 @@
 //   },
 // });
 
-// App.js
 import 'react-native-gesture-handler';
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// Importamos las vistas (las crearemos a continuación)
+// IMPORTACIÓN VISTAS
 import LoginVista from './src/vistas/LoginVista';
 import RegistroVista from './src/vistas/RegistroVista';
 import PrincipalVista from './src/vistas/PrincipalVista';
-// import MainVista from './src/vistas/MainVista';
 
 const Stack = createStackNavigator();
 
@@ -39,7 +37,7 @@ export default function App() {
       <Stack.Navigator 
         initialRouteName="Login"
         screenOptions={{
-          headerStyle: { backgroundColor: '#2ecc71' },
+          headerStyle: { backgroundColor: '#4f46e5' },
           headerTintColor: '#fff',
         }}
       >
@@ -56,7 +54,7 @@ export default function App() {
         <Stack.Screen 
           name="Main" 
           component={PrincipalVista} 
-          options={{ title: 'Gestora App', headerLeft: null }} // headerLeft: null oculta el botón atrás tras loguear
+          options={{ title: 'GYM EX', headerLeft: null }} // headerLeft: null oculta el botón atrás tras loguear
         />
       </Stack.Navigator>
     </NavigationContainer>

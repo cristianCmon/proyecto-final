@@ -86,9 +86,6 @@
 
 /* Área con scroll para que el contenido no se pierda */
 .scrollable-area {
-  /* padding: 40px;
-  overflow-y: auto;
-  flex-grow: 1; */
   flex-grow: 1;      /* Ocupa el espacio sobrante */
   overflow-y: auto;  /* Permite el scroll vertical si el contenido excede el alto */
   padding: 40px;     /* Espaciado interno */
@@ -141,16 +138,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* transition: transform 0.2s; */
-  /* transition: transform 0.2s ease; */
 }
 
-.act-card:hover {
-  /* transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05); */
-  /* transform: scale(1.01);  */
-  /* box-shadow: 0 10px 20px rgba(0,0,0,0.1); */
-}
 
 /* Contenedor padre de los botones */
 .act-actions {
@@ -158,7 +147,7 @@
   width: 100%;
 }
 
-/* Forzamos la fila (row) */
+/* Forzamos la fila */
 .admin-controls-container {
   display: flex;
   flex-direction: row; /* Alineación horizontal */
@@ -169,7 +158,7 @@
 
 /* Ajuste de los botones para que se vean bien en fila */
 .admin-controls-container button {
-  flex: 1;             /* Hace que todos tengan el mismo ancho proporcional */
+  flex: 1;
   min-width: fit-content; /* Evita que el texto se corte */
   padding: 8px 10px;
   font-size: 0.8rem;
@@ -177,7 +166,7 @@
   white-space: nowrap; /* Evita que el texto salte de línea dentro del botón */
 }
 
-/* Estilo específico para el de generar si quieres que destaque un poco más */
+
 .btn-generate {
   background-color: #6366f1;
   color: white;
