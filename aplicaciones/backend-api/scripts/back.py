@@ -1212,7 +1212,10 @@ def eliminar_asistencia(id):
 if __name__ == '__main__':
     print('\nIniciando Backend...\n')
     # app.run(debug = True, use_reloader = False)
-    app.run(debug = True)
+    # app.run(debug = True)
+
+    # Es necesario este ajuste para poder conectar con el front de móvil
+    app.run(debug = True, host='0.0.0.0', port=5000)
 
 # GUÍAS
 # https://j2logo.com/leccion-1-la-primera-aplicacion-flask/
