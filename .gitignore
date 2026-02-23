@@ -6,3 +6,4 @@ dist_electron/
 .DS_Store
 venv/
 __pycache__/
+.expo
